@@ -2,7 +2,6 @@
 ### FACULTAD DE INGENIERÍA EN SISTEMAS Y CIENCIAS DE LA COMPUTACIÓN
 ### CAMPUS COBÁN, ALTA VERAPAZ
 **Curso:** Programación II  
-**Catedrático:** Ing. Docente del Curso  
 **Proyecto:** Sistema de Gestión Escolar (SGE) - Variante 3  
 **Fase:** Primer Entregable - Arquitectura y Diagrama de Clases UML  
 **Fecha:** 17 de septiembre de 2026  
@@ -46,7 +45,7 @@ Registra la información legal y de contacto de los tutores o encargados respons
 
 | # | Entidad | Tipo | Atributos Principales | Descripción del Rol |
 |---|---|---|---|---|
-| 1 | **Persona** | Clase Base (Abstracta) | `id`, `nombre`, `apellido`, `telefono`, `email` | Superclase que consolida los atributos comunes y promueve la reutilización de código mediante herencia. |
+| 1 | **Persona** | Base (Abstracta) | `id`, `nombre`, `apellido`, `telefono`, `email` | Superclase que consolida los atributos comunes y promueve la reutilización de código mediante herencia. |
 | 2 | **Estudiante** | Especialización | `carnet`, `fechaNacimiento`, `idEncargado` | Representa al alumno matriculado; hereda de `Persona` y vincula a su responsable legal. |
 | 3 | **Docente** | Especialización | `codigoEmpleado`, `especialidad` | Representa al catedrático titular; hereda de `Persona` y se vincula como instructor de cursos. |
 | 4 | **Encargado** | Especialización | `cui`, `parentesco`, `direccion` | Representa al padre de familia o tutor legal del alumno; hereda de `Persona`. |
