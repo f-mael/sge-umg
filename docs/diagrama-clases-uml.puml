@@ -1,0 +1,262 @@
+@startuml
+!pragma layout smetana
+
+title Sistema de Gestión Escolar\nDiagrama de Clases UML
+
+left to right direction
+skinparam shadowing false
+skinparam linetype ortho
+skinparam roundcorner 8
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Arial
+skinparam classFontSize 14
+skinparam classAttributeFontSize 11
+skinparam ArrowFontSize 11
+skinparam ArrowColor #4A5568
+skinparam classBorderColor #2D3748
+skinparam classBackgroundColor #F8FAFC
+skinparam dpi 180
+hide circle
+
+abstract class Persona {
+    # id : int
+    # nombre : String
+    # apellido : String
+    # telefono : String
+    # email : String
+    --
+    + Persona()
+    + Persona(...)
+    + getId() : int
+    + setId(id : int) : void
+    + getNombre() : String
+    + setNombre(nombre : String) : void
+    + getApellido() : String
+    + setApellido(apellido : String) : void
+    + getTelefono() : String
+    + setTelefono(telefono : String) : void
+    + getEmail() : String
+    + setEmail(email : String) : void
+    + getNombreCompleto() : String
+}
+
+class Estudiante {
+    - carnet : String
+    - fechaNacimiento : LocalDate
+    - idEncargado : int
+    --
+    + Estudiante()
+    + Estudiante(...)
+    + getCarnet() : String
+    + setCarnet(carnet : String) : void
+    + getFechaNacimiento() : LocalDate
+    + setFechaNacimiento(fecha : LocalDate) : void
+    + getIdEncargado() : int
+    + setIdEncargado(id : int) : void
+}
+
+class Docente {
+    - codigoEmpleado : String
+    - especialidad : String
+    --
+    + Docente()
+    + Docente(...)
+    + getCodigoEmpleado() : String
+    + setCodigoEmpleado(codigo : String) : void
+    + getEspecialidad() : String
+    + setEspecialidad(especialidad : String) : void
+}
+
+class Encargado {
+    - cui : String
+    - parentesco : String
+    - direccion : String
+    --
+    + Encargado()
+    + Encargado(...)
+    + getCui() : String
+    + setCui(cui : String) : void
+    + getParentesco() : String
+    + setParentesco(parentesco : String) : void
+    + getDireccion() : String
+    + setDireccion(direccion : String) : void
+}
+
+class GradoSeccion {
+    - idGradoSeccion : int
+    - nombre : String
+    - nivel : String
+    - seccion : char
+    --
+    + GradoSeccion()
+    + GradoSeccion(...)
+    + getIdGradoSeccion() : int
+    + setIdGradoSeccion(id : int) : void
+    + getNombre() : String
+    + setNombre(nombre : String) : void
+    + getNivel() : String
+    + setNivel(nivel : String) : void
+    + getSeccion() : char
+    + setSeccion(seccion : char) : void
+}
+
+class Curso {
+    - idCurso : int
+    - nombre : String
+    - docente : Docente
+    - gradoSeccion : GradoSeccion
+    --
+    + Curso()
+    + Curso(...)
+    + getIdCurso() : int
+    + setIdCurso(id : int) : void
+    + getNombre() : String
+    + setNombre(nombre : String) : void
+    + getDocente() : Docente
+    + setDocente(docente : Docente) : void
+    + getGradoSeccion() : GradoSeccion
+    + setGradoSeccion(grado : GradoSeccion) : void
+}
+
+class CicloEscolar {
+    - idCiclo : int
+    - anio : int
+    - fechaInicio : LocalDate
+    - fechaFin : LocalDate
+    - activo : boolean
+    --
+    + CicloEscolar()
+    + CicloEscolar(...)
+    + getIdCiclo() : int
+    + setIdCiclo(id : int) : void
+    + getAnio() : int
+    + setAnio(anio : int) : void
+    + getFechaInicio() : LocalDate
+    + setFechaInicio(fecha : LocalDate) : void
+    + getFechaFin() : LocalDate
+    + setFechaFin(fecha : LocalDate) : void
+    + isActivo() : boolean
+    + setActivo(activo : boolean) : void
+}
+
+class Inscripcion {
+    - idInscripcion : int
+    - fechaInscripcion : LocalDate
+    - estudiante : Estudiante
+    - gradoSeccion : GradoSeccion
+    - cicloEscolar : CicloEscolar
+    --
+    + Inscripcion()
+    + Inscripcion(...)
+    + getIdInscripcion() : int
+    + setIdInscripcion(id : int) : void
+    + getFechaInscripcion() : LocalDate
+    + setFechaInscripcion(fecha : LocalDate) : void
+    + getEstudiante() : Estudiante
+    + setEstudiante(estudiante : Estudiante) : void
+    + getGradoSeccion() : GradoSeccion
+    + setGradoSeccion(grado : GradoSeccion) : void
+    + getCicloEscolar() : CicloEscolar
+    + setCicloEscolar(ciclo : CicloEscolar) : void
+}
+
+class Asistencia {
+    - idAsistencia : int
+    - estudiante : Estudiante
+    - curso : Curso
+    - fecha : LocalDate
+    - estado : String
+    --
+    + Asistencia()
+    + Asistencia(...)
+    + getIdAsistencia() : int
+    + setIdAsistencia(id : int) : void
+    + getEstudiante() : Estudiante
+    + setEstudiante(estudiante : Estudiante) : void
+    + getCurso() : Curso
+    + setCurso(curso : Curso) : void
+    + getFecha() : LocalDate
+    + setFecha(fecha : LocalDate) : void
+    + getEstado() : String
+    + setEstado(estado : String) : void
+}
+
+class BoletaCalificaciones {
+    - idBoleta : int
+    - estudiante : Estudiante
+    - cicloEscolar : CicloEscolar
+    - periodo : String
+    - fechaEmision : LocalDate
+    - detalles : List<DetalleBoleta>
+    - promedio : double
+    --
+    + BoletaCalificaciones()
+    + BoletaCalificaciones(...)
+    + getIdBoleta() : int
+    + setIdBoleta(id : int) : void
+    + getEstudiante() : Estudiante
+    + setEstudiante(estudiante : Estudiante) : void
+    + getCicloEscolar() : CicloEscolar
+    + setCicloEscolar(ciclo : CicloEscolar) : void
+    + getPeriodo() : String
+    + setPeriodo(periodo : String) : void
+    + getFechaEmision() : LocalDate
+    + setFechaEmision(fecha : LocalDate) : void
+    + getDetalles() : List<DetalleBoleta>
+    + setDetalles(detalles : List<DetalleBoleta>) : void
+    + getPromedio() : double
+    + agregarDetalle(detalle : DetalleBoleta) : void
+    + eliminarDetalle(detalle : DetalleBoleta) : boolean
+    + calcularPromedio() : double
+}
+
+class DetalleBoleta {
+    - idDetalle : int
+    - curso : Curso
+    - nota : double
+    - observacion : String
+    --
+    + DetalleBoleta()
+    + DetalleBoleta(...)
+    + getIdDetalle() : int
+    + setIdDetalle(id : int) : void
+    + getCurso() : Curso
+    + setCurso(curso : Curso) : void
+    + getNota() : double
+    + setNota(nota : double) : void
+    + getObservacion() : String
+    + setObservacion(observacion : String) : void
+}
+
+Persona <|-- Estudiante
+Persona <|-- Docente
+Persona <|-- Encargado
+
+Encargado "1" -- "0..*" Estudiante : responsable de
+Docente "1" -- "0..*" Curso : imparte
+GradoSeccion "1" -- "0..*" Curso : contiene
+
+Estudiante "1" -- "0..*" Inscripcion : realiza
+GradoSeccion "1" -- "0..*" Inscripcion : recibe
+CicloEscolar "1" -- "0..*" Inscripcion : corresponde a
+
+Estudiante "1" -- "0..*" Asistencia : registra
+Curso "1" -- "0..*" Asistencia : controla
+
+Estudiante "1" -- "0..*" BoletaCalificaciones : recibe
+CicloEscolar "1" -- "0..*" BoletaCalificaciones : agrupa
+
+BoletaCalificaciones "1" *-- "0..*" DetalleBoleta : contiene
+Curso "1" -- "0..*" DetalleBoleta : califica
+
+legend bottom left
+    |= Símbolo |= Significado |
+    | <|-- | Herencia |
+    | -- | Asociación |
+    | *-- | Composición maestro-detalle |
+    | 1 / 0..* | Multiplicidad |
+endlegend
+
+footer Proyecto Programación II - Sistema de Gestión Escolar
+
+@enduml
