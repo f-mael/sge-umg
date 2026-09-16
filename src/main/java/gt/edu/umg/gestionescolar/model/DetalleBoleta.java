@@ -6,7 +6,7 @@ public class DetalleBoleta {
     private double nota;
     private String observacion;
 
-        public DetalleBoleta() {
+    public DetalleBoleta() {
     }
 
     public DetalleBoleta(int idDetalle, Curso curso, double nota, String observacion) {
@@ -15,7 +15,8 @@ public class DetalleBoleta {
         this.nota = nota;
         this.observacion = observacion;
     }
-        public int getIdDetalle() {
+
+    public int getIdDetalle() {
         return idDetalle;
     }
 
@@ -30,7 +31,8 @@ public class DetalleBoleta {
     public String getObservacion() {
         return observacion;
     }
-        public void setIdDetalle(int idDetalle) {
+
+    public void setIdDetalle(int idDetalle) {
         this.idDetalle = idDetalle;
     }
 

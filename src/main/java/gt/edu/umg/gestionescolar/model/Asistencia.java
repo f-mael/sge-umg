@@ -9,11 +9,11 @@ public class Asistencia {
     private LocalDate fecha;
     private String estado;
 
-        public Asistencia() {
+    public Asistencia() {
     }
 
     public Asistencia(int idAsistencia, Estudiante estudiante, Curso curso,
-                      LocalDate fecha, String estado) {
+            LocalDate fecha, String estado) {
         this.idAsistencia = idAsistencia;
         this.estudiante = estudiante;
         this.curso = curso;
@@ -21,7 +21,7 @@ public class Asistencia {
         this.estado = estado;
     }
 
-        public int getIdAsistencia() {
+    public int getIdAsistencia() {
         return idAsistencia;
     }
 
@@ -41,7 +41,7 @@ public class Asistencia {
         return estado;
     }
 
-        public void setIdAsistencia(int idAsistencia) {
+    public void setIdAsistencia(int idAsistencia) {
         this.idAsistencia = idAsistencia;
     }
 
