@@ -28,7 +28,7 @@ public class EstudianteRepository implements Repository<Estudiante> {
             stmt.setString(5, estudiante.getCarnet());
             stmt.setString(6, estudiante.getFechaNacimiento().toString());
 
-            if (estudiante.getIdEncargado() > 0) {
+            if (estudiante.getIdEncargado() != null && estudiante.getIdEncargado() > 0) {
                 stmt.setInt(7, estudiante.getIdEncargado());
             } else {
                 stmt.setNull(7, Types.INTEGER);
@@ -64,7 +64,7 @@ public class EstudianteRepository implements Repository<Estudiante> {
             stmt.setString(5, estudiante.getCarnet());
             stmt.setString(6, estudiante.getFechaNacimiento().toString());
 
-            if (estudiante.getIdEncargado() > 0) {
+            if (estudiante.getIdEncargado() != null && estudiante.getIdEncargado() > 0) {
                 stmt.setInt(7, estudiante.getIdEncargado());
             } else {
                 stmt.setNull(7, Types.INTEGER);
@@ -124,6 +124,14 @@ public class EstudianteRepository implements Repository<Estudiante> {
     }
 
     private Estudiante mapResultSetToEstudiante(ResultSet rs) throws SQLException {
+        int idEncargadoVal = rs.getInt("id_encargado");
+        Integer idEncargado = rs.wasNull() ? null : idEncargadoVal;
+
+        String fechaNacStr = rs.getString("fecha_nacimiento");
+        LocalDate fechaNacimiento = (fechaNacStr != null && !fechaNacStr.isBlank()) 
+                ? LocalDate.parse(fechaNacStr) 
+                : null;
+
         return new Estudiante(
                 rs.getInt("id"),
                 rs.getString("nombre"),
@@ -131,7 +139,7 @@ public class EstudianteRepository implements Repository<Estudiante> {
                 rs.getString("telefono"),
                 rs.getString("email"),
                 rs.getString("carnet"),
-                LocalDate.parse(rs.getString("fecha_nacimiento")),
-                rs.getInt("id_encargado"));
+                fechaNacimiento,
+                idEncargado);
     }
 }
