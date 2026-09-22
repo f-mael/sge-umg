@@ -3,26 +3,19 @@ package gt.edu.umg.gestionescolar.controller;
 import gt.edu.umg.gestionescolar.model.Docente;
 import gt.edu.umg.gestionescolar.model.Encargado;
 import gt.edu.umg.gestionescolar.model.Estudiante;
+import gt.edu.umg.gestionescolar.repository.DocenteRepository;
+import gt.edu.umg.gestionescolar.repository.EncargadoRepository;
+import gt.edu.umg.gestionescolar.repository.EstudianteRepository;
 import gt.edu.umg.gestionescolar.repository.Repository;
-import gt.edu.umg.gestionescolar.repository.RepositoryFactory;
-import gt.edu.umg.gestionescolar.repository.RepositoryFactory.RepositoryType;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
 
 import java.net.URL;
@@ -30,22 +23,24 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Controlador principal para el Módulo Base y Personas.
- * Gestiona el ciclo CRUD, enlace de datos, validaciones y reportes para
- * Estudiantes, Docentes y Encargados, con soporte de doble persistencia.
+ * Opera 100% con almacenamiento en memoria mediante listas de objetos (ArrayList).
+ * Cumple con los requerimientos del Entregable 2 (Programación II).
  */
 public class PersonasController implements Initializable {
+
+    // Repositorios en memoria basados en ArrayList
+    private final Repository<Estudiante> estudianteRepo = new EstudianteRepository();
+    private final Repository<Docente> docenteRepo = new DocenteRepository();
+    private final Repository<Encargado> encargadoRepo = new EncargadoRepository();
 
     // ==========================================
     // CONTROLES DE CABECERA Y ESTADO
     // ==========================================
-    @FXML private ComboBox<RepositoryType> cbPersistencia;
     @FXML private TabPane tabPanePrincipal;
     @FXML private Label lblEstadoSistema;
-    @FXML private Label lblPersistenciaActiva;
 
     // ==========================================
     // PESTAÑA 1: ESTUDIANTES
@@ -117,7 +112,7 @@ public class PersonasController implements Initializable {
     @FXML private TableColumn<Encargado, String> colEncargadoEmail;
     @FXML private TableColumn<Encargado, String> colEncargadoDireccion;
 
-    // Listas observables enlazadas a las tablas
+    // Listas observables para las tablas
     private final ObservableList<Estudiante> estudiantesObservable = FXCollections.observableArrayList();
     private final ObservableList<Docente> docentesObservable = FXCollections.observableArrayList();
     private final ObservableList<Encargado> encargadosObservable = FXCollections.observableArrayList();
@@ -127,7 +122,6 @@ public class PersonasController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        configurarSelectorPersistencia();
         configurarTablas();
         configurarComboBoxes();
         configurarFiltrosBusqueda();
@@ -138,23 +132,6 @@ public class PersonasController implements Initializable {
     // ==========================================
     // CONFIGURACIONES INICIALES
     // ==========================================
-
-    private void configurarSelectorPersistencia() {
-        cbPersistencia.setItems(FXCollections.observableArrayList(RepositoryType.values()));
-        cbPersistencia.setValue(RepositoryFactory.getRepositoryType());
-        cbPersistencia.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(RepositoryType object) {
-                return object != null ? object.getDescripcion() : "";
-            }
-
-            @Override
-            public RepositoryType fromString(String string) {
-                return null;
-            }
-        });
-        actualizarTextoEstadoPersistencia();
-    }
 
     private void configurarTablas() {
         // Tabla Estudiantes
@@ -173,11 +150,11 @@ public class PersonasController implements Initializable {
             if (idEnc == null || idEnc <= 0) {
                 return new SimpleStringProperty("Sin Encargado");
             }
-            Optional<Encargado> enc = RepositoryFactory.getEncargadoRepository().findById(idEnc);
+            Optional<Encargado> enc = encargadoRepo.findById(idEnc);
             return new SimpleStringProperty(enc.map(e -> e.getNombreCompleto() + " (" + e.getParentesco() + ")").orElse("ID: " + idEnc));
         });
         tblEstudiantes.setItems(estudiantesObservable);
-        tblEstudiantes.setPlaceholder(new Label("No hay estudiantes registrados."));
+        tblEstudiantes.setPlaceholder(new Label("No hay estudiantes registrados en memoria."));
 
         // Tabla Docentes
         colDocenteId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -188,7 +165,7 @@ public class PersonasController implements Initializable {
         colDocenteTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colDocenteEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         tblDocentes.setItems(docentesObservable);
-        tblDocentes.setPlaceholder(new Label("No hay docentes registrados."));
+        tblDocentes.setPlaceholder(new Label("No hay docentes registrados en memoria."));
 
         // Tabla Encargados
         colEncargadoId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -200,17 +177,15 @@ public class PersonasController implements Initializable {
         colEncargadoEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colEncargadoDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
         tblEncargados.setItems(encargadosObservable);
-        tblEncargados.setPlaceholder(new Label("No hay encargados registrados."));
+        tblEncargados.setPlaceholder(new Label("No hay encargados registrados en memoria."));
     }
 
     private void configurarComboBoxes() {
-        // Parentescos comunes
         cbEncargadoParentesco.setItems(FXCollections.observableArrayList(
                 "Padre", "Madre", "Tutor Legal", "Abuelo/a", "Tío/a", "Hermano/a Mayor", "Otro"
         ));
         cbEncargadoParentesco.setEditable(true);
 
-        // StringConverter para ComboBox de Encargados
         cbEstudianteEncargado.setConverter(new StringConverter<>() {
             @Override
             public String toString(Encargado enc) {
@@ -254,143 +229,98 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // CARGA Y REFRESH DE DATOS
+    // CARGA Y REFRESH DE DATOS EN MEMORIA
     // ==========================================
 
     private void cargarDatosGenerales() {
         cargarEncargados();
         cargarEstudiantes();
         cargarDocentes();
-        actualizarEstadoGlobal("Datos actualizados correctamente.");
+        actualizarEstado("Datos en memoria sincronizados.");
     }
 
     private void cargarEstudiantes() {
-        try {
-            List<Estudiante> lista = RepositoryFactory.getEstudianteRepository().findAll();
-            estudiantesObservable.setAll(lista);
-            lblEstudianteContador.setText("Total: " + lista.size() + " estudiantes");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Datos", "No se pudieron listar los estudiantes:\n" + e.getMessage());
-        }
+        List<Estudiante> lista = estudianteRepo.findAll();
+        estudiantesObservable.setAll(lista);
+        lblEstudianteContador.setText("Total: " + lista.size() + " estudiantes");
     }
 
     private void cargarDocentes() {
-        try {
-            List<Docente> lista = RepositoryFactory.getDocenteRepository().findAll();
-            docentesObservable.setAll(lista);
-            lblDocenteContador.setText("Total: " + lista.size() + " docentes");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Datos", "No se pudieron listar los docentes:\n" + e.getMessage());
-        }
+        List<Docente> lista = docenteRepo.findAll();
+        docentesObservable.setAll(lista);
+        lblDocenteContador.setText("Total: " + lista.size() + " docentes");
     }
 
     private void cargarEncargados() {
-        try {
-            List<Encargado> lista = RepositoryFactory.getEncargadoRepository().findAll();
-            encargadosObservable.setAll(lista);
-            lblEncargadoContador.setText("Total: " + lista.size() + " encargados");
+        List<Encargado> lista = encargadoRepo.findAll();
+        encargadosObservable.setAll(lista);
+        lblEncargadoContador.setText("Total: " + lista.size() + " encargados");
 
-            // Actualizar ComboBox de Estudiantes
-            List<Encargado> comboList = new ArrayList<>();
-            Encargado opcionVacia = new Encargado(0, "", "", "", "", "", "", "");
-            comboList.add(opcionVacia);
-            comboList.addAll(lista);
-            cbEstudianteEncargado.setItems(FXCollections.observableArrayList(comboList));
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error de Datos", "No se pudieron listar los encargados:\n" + e.getMessage());
-        }
+        List<Encargado> comboList = new ArrayList<>();
+        Encargado opcionVacia = new Encargado(0, "", "", "", "", "", "", "");
+        comboList.add(opcionVacia);
+        comboList.addAll(lista);
+        cbEstudianteEncargado.setItems(FXCollections.observableArrayList(comboList));
     }
 
-    @FXML
-    private void handleCambioPersistencia(ActionEvent event) {
-        RepositoryType seleccionado = cbPersistencia.getValue();
-        if (seleccionado != null && seleccionado != RepositoryFactory.getRepositoryType()) {
-            RepositoryFactory.setRepositoryType(seleccionado);
-            actualizarTextoEstadoPersistencia();
-            limpiarFormularioEstudiante();
-            limpiarFormularioDocente();
-            limpiarFormularioEncargado();
-            cargarDatosGenerales();
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Persistencia Cambiada",
-                    "El modo activo ahora es: " + seleccionado.getDescripcion() + ".\nLas vistas se han sincronizado.");
-        }
-    }
-
-    private void actualizarTextoEstadoPersistencia() {
-        RepositoryType tipo = RepositoryFactory.getRepositoryType();
-        lblPersistenciaActiva.setText("Persistencia Activa: " + tipo.getDescripcion());
-    }
-
-    private void actualizarEstadoGlobal(String mensaje) {
-        lblEstadoSistema.setText(mensaje + " (Última acción: " + LocalDate.now() + ")");
+    private void actualizarEstado(String mensaje) {
+        lblEstadoSistema.setText(mensaje + " | Almacenamiento: ArrayList");
     }
 
     // ==========================================
-    // CRUD: ESTUDIANTES
+    // CRUD: ESTUDIANTES (MEMORIA)
     // ==========================================
 
     @FXML
     private void handleGuardarEstudiante(ActionEvent event) {
         if (!validarFormularioEstudiante()) return;
 
-        try {
-            Estudiante estudiante = construirEstudianteDesdeFormulario(0);
-            RepositoryFactory.getEstudianteRepository().save(estudiante);
+        Estudiante estudiante = construirEstudianteDesdeFormulario(0);
+        estudianteRepo.save(estudiante);
 
-            cargarEstudiantes();
-            limpiarFormularioEstudiante();
-            actualizarEstadoGlobal("Estudiante guardado exitosamente.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Operación Exitosa", "El estudiante ha sido registrado correctamente.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "Ocurrió un problema al guardar el estudiante:\n" + e.getMessage());
-        }
+        cargarEstudiantes();
+        limpiarFormularioEstudiante();
+        actualizarEstado("Estudiante agregado a la lista en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Estudiante Agregado", "Estudiante agregado con éxito a la lista en memoria.");
     }
 
     @FXML
     private void handleActualizarEstudiante(ActionEvent event) {
         String idStr = txtEstudianteId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un estudiante de la tabla para actualizar.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un estudiante de la tabla para modificar.");
             return;
         }
 
         if (!validarFormularioEstudiante()) return;
 
-        try {
-            int id = Integer.parseInt(idStr.trim());
-            Estudiante estudiante = construirEstudianteDesdeFormulario(id);
-            RepositoryFactory.getEstudianteRepository().update(estudiante);
+        int id = Integer.parseInt(idStr.trim());
+        Estudiante estudiante = construirEstudianteDesdeFormulario(id);
+        estudianteRepo.update(estudiante);
 
-            cargarEstudiantes();
-            limpiarFormularioEstudiante();
-            actualizarEstadoGlobal("Estudiante ID " + id + " actualizado exitosamente.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Operación Exitosa", "Los datos del estudiante han sido actualizados.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Actualizar", "Ocurrió un problema al actualizar:\n" + e.getMessage());
-        }
+        cargarEstudiantes();
+        limpiarFormularioEstudiante();
+        actualizarEstado("Estudiante modificado en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Estudiante Modificado", "Los datos del estudiante han sido modificados.");
     }
 
     @FXML
     private void handleEliminarEstudiante(ActionEvent event) {
         String idStr = txtEstudianteId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione el estudiante que desea eliminar de la tabla.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un estudiante de la tabla para eliminar.");
             return;
         }
 
         int id = Integer.parseInt(idStr.trim());
         String nombre = txtEstudianteNombre.getText() + " " + txtEstudianteApellido.getText();
 
-        if (confirmarAccion("Confirmar Eliminación", "¿Está seguro de eliminar al estudiante: " + nombre + "?")) {
-            try {
-                RepositoryFactory.getEstudianteRepository().delete(id);
-                cargarEstudiantes();
-                limpiarFormularioEstudiante();
-                actualizarEstadoGlobal("Estudiante ID " + id + " eliminado.");
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Eliminado", "El estudiante ha sido eliminado del sistema.");
-            } catch (Exception e) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error al Eliminar", "No se pudo eliminar el estudiante:\n" + e.getMessage());
-            }
+        if (confirmarAccion("Confirmar Eliminación", "¿Desea eliminar al estudiante '" + nombre + "' de la lista?")) {
+            estudianteRepo.delete(id);
+            cargarEstudiantes();
+            limpiarFormularioEstudiante();
+            actualizarEstado("Estudiante eliminado de la lista.");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Estudiante Eliminado", "Estudiante eliminado exitosamente.");
         }
     }
 
@@ -406,13 +336,9 @@ public class PersonasController implements Initializable {
     }
 
     private void filtrarEstudiantes(String criterio) {
-        try {
-            List<Estudiante> resultados = RepositoryFactory.getEstudianteRepository().search(criterio);
-            estudiantesObservable.setAll(resultados);
-            lblEstudianteContador.setText("Resultados: " + resultados.size() + " estudiantes");
-        } catch (Exception e) {
-            System.err.println("Error filtrando estudiantes: " + e.getMessage());
-        }
+        List<Estudiante> resultados = estudianteRepo.search(criterio);
+        estudiantesObservable.setAll(resultados);
+        lblEstudianteContador.setText("Resultados: " + resultados.size() + " estudiantes");
     }
 
     private void cargarEstudianteAlFormulario(Estudiante est) {
@@ -424,7 +350,6 @@ public class PersonasController implements Initializable {
         txtEstudianteEmail.setText(est.getEmail() != null ? est.getEmail() : "");
         dpEstudianteFechaNac.setValue(est.getFechaNacimiento());
 
-        // Seleccionar encargado correspondiente
         if (est.getIdEncargado() != null && est.getIdEncargado() > 0) {
             cbEstudianteEncargado.getItems().stream()
                     .filter(enc -> enc.getId() == est.getIdEncargado())
@@ -466,7 +391,7 @@ public class PersonasController implements Initializable {
             return false;
         }
         if (dpEstudianteFechaNac.getValue() == null) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe seleccionar una fecha de nacimiento válida.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe seleccionar la fecha de nacimiento.");
             dpEstudianteFechaNac.requestFocus();
             return false;
         }
@@ -476,7 +401,7 @@ public class PersonasController implements Initializable {
             return false;
         }
         if (!esVacio(txtEstudianteEmail.getText()) && !EMAIL_PATTERN.matcher(txtEstudianteEmail.getText().trim()).matches()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "El formato del correo electrónico no es válido (ej. usuario@dominio.com).");
+            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "Formato de correo inválido (ej. alumno@miumg.edu.gt).");
             txtEstudianteEmail.requestFocus();
             return false;
         }
@@ -500,71 +425,59 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // CRUD: DOCENTES
+    // CRUD: DOCENTES (MEMORIA)
     // ==========================================
 
     @FXML
     private void handleGuardarDocente(ActionEvent event) {
         if (!validarFormularioDocente()) return;
 
-        try {
-            Docente docente = construirDocenteDesdeFormulario(0);
-            RepositoryFactory.getDocenteRepository().save(docente);
+        Docente docente = construirDocenteDesdeFormulario(0);
+        docenteRepo.save(docente);
 
-            cargarDocentes();
-            limpiarFormularioDocente();
-            actualizarEstadoGlobal("Docente guardado exitosamente.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Operación Exitosa", "El docente ha sido registrado correctamente.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "Ocurrió un problema al guardar el docente:\n" + e.getMessage());
-        }
+        cargarDocentes();
+        limpiarFormularioDocente();
+        actualizarEstado("Docente agregado a la lista en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Docente Agregado", "Docente agregado con éxito a la lista en memoria.");
     }
 
     @FXML
     private void handleActualizarDocente(ActionEvent event) {
         String idStr = txtDocenteId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un docente de la tabla para actualizar.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un docente de la tabla para modificar.");
             return;
         }
 
         if (!validarFormularioDocente()) return;
 
-        try {
-            int id = Integer.parseInt(idStr.trim());
-            Docente docente = construirDocenteDesdeFormulario(id);
-            RepositoryFactory.getDocenteRepository().update(docente);
+        int id = Integer.parseInt(idStr.trim());
+        Docente docente = construirDocenteDesdeFormulario(id);
+        docenteRepo.update(docente);
 
-            cargarDocentes();
-            limpiarFormularioDocente();
-            actualizarEstadoGlobal("Docente ID " + id + " actualizado exitosamente.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Operación Exitosa", "Los datos del docente han sido actualizados.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Actualizar", "Ocurrió un problema al actualizar el docente:\n" + e.getMessage());
-        }
+        cargarDocentes();
+        limpiarFormularioDocente();
+        actualizarEstado("Docente modificado en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Docente Modificado", "Los datos del docente han sido modificados.");
     }
 
     @FXML
     private void handleEliminarDocente(ActionEvent event) {
         String idStr = txtDocenteId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione el docente que desea eliminar de la tabla.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un docente de la tabla para eliminar.");
             return;
         }
 
         int id = Integer.parseInt(idStr.trim());
         String nombre = txtDocenteNombre.getText() + " " + txtDocenteApellido.getText();
 
-        if (confirmarAccion("Confirmar Eliminación", "¿Está seguro de eliminar al docente: " + nombre + "?")) {
-            try {
-                RepositoryFactory.getDocenteRepository().delete(id);
-                cargarDocentes();
-                limpiarFormularioDocente();
-                actualizarEstadoGlobal("Docente ID " + id + " eliminado.");
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Eliminado", "El docente ha sido eliminado del sistema.");
-            } catch (Exception e) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error al Eliminar", "No se pudo eliminar el docente:\n" + e.getMessage());
-            }
+        if (confirmarAccion("Confirmar Eliminación", "¿Desea eliminar al docente '" + nombre + "' de la lista?")) {
+            docenteRepo.delete(id);
+            cargarDocentes();
+            limpiarFormularioDocente();
+            actualizarEstado("Docente eliminado de la lista.");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Docente Eliminado", "Docente eliminado exitosamente.");
         }
     }
 
@@ -580,13 +493,9 @@ public class PersonasController implements Initializable {
     }
 
     private void filtrarDocentes(String criterio) {
-        try {
-            List<Docente> resultados = RepositoryFactory.getDocenteRepository().search(criterio);
-            docentesObservable.setAll(resultados);
-            lblDocenteContador.setText("Resultados: " + resultados.size() + " docentes");
-        } catch (Exception e) {
-            System.err.println("Error filtrando docentes: " + e.getMessage());
-        }
+        List<Docente> resultados = docenteRepo.search(criterio);
+        docentesObservable.setAll(resultados);
+        lblDocenteContador.setText("Resultados: " + resultados.size() + " docentes");
     }
 
     private void cargarDocenteAlFormulario(Docente doc) {
@@ -612,7 +521,7 @@ public class PersonasController implements Initializable {
 
     private boolean validarFormularioDocente() {
         if (esVacio(txtDocenteCodigo.getText())) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "El código de empleado del docente es obligatorio.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "El código de empleado es obligatorio.");
             txtDocenteCodigo.requestFocus();
             return false;
         }
@@ -632,7 +541,7 @@ public class PersonasController implements Initializable {
             return false;
         }
         if (!esVacio(txtDocenteEmail.getText()) && !EMAIL_PATTERN.matcher(txtDocenteEmail.getText().trim()).matches()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "El formato del correo electrónico no es válido.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "Formato de correo electrónico inválido.");
             txtDocenteEmail.requestFocus();
             return false;
         }
@@ -652,73 +561,61 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // CRUD: ENCARGADOS
+    // CRUD: ENCARGADOS (MEMORIA)
     // ==========================================
 
     @FXML
     private void handleGuardarEncargado(ActionEvent event) {
         if (!validarFormularioEncargado()) return;
 
-        try {
-            Encargado encargado = construirEncargadoDesdeFormulario(0);
-            RepositoryFactory.getEncargadoRepository().save(encargado);
+        Encargado encargado = construirEncargadoDesdeFormulario(0);
+        encargadoRepo.save(encargado);
 
-            cargarEncargados();
-            limpiarFormularioEncargado();
-            actualizarEstadoGlobal("Encargado guardado exitosamente.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Operación Exitosa", "El encargado ha sido registrado correctamente.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Guardar", "Ocurrió un problema al guardar el encargado:\n" + e.getMessage());
-        }
+        cargarEncargados();
+        limpiarFormularioEncargado();
+        actualizarEstado("Encargado agregado a la lista en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Encargado Agregado", "Encargado agregado con éxito a la lista en memoria.");
     }
 
     @FXML
     private void handleActualizarEncargado(ActionEvent event) {
         String idStr = txtEncargadoId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un encargado de la tabla para actualizar.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un encargado de la tabla para modificar.");
             return;
         }
 
         if (!validarFormularioEncargado()) return;
 
-        try {
-            int id = Integer.parseInt(idStr.trim());
-            Encargado encargado = construirEncargadoDesdeFormulario(id);
-            RepositoryFactory.getEncargadoRepository().update(encargado);
+        int id = Integer.parseInt(idStr.trim());
+        Encargado encargado = construirEncargadoDesdeFormulario(id);
+        encargadoRepo.update(encargado);
 
-            cargarEncargados();
-            cargarEstudiantes(); // Refresca nombres de encargados en estudiantes si cambiaron
-            limpiarFormularioEncargado();
-            actualizarEstadoGlobal("Encargado ID " + id + " actualizado exitosamente.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Operación Exitosa", "Los datos del encargado han sido actualizados.");
-        } catch (Exception e) {
-            mostrarAlerta(Alert.AlertType.ERROR, "Error al Actualizar", "Ocurrió un problema al actualizar el encargado:\n" + e.getMessage());
-        }
+        cargarEncargados();
+        cargarEstudiantes(); // Refresca nombres de encargados en la tabla de estudiantes
+        limpiarFormularioEncargado();
+        actualizarEstado("Encargado modificado en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Encargado Modificado", "Los datos del encargado han sido modificados.");
     }
 
     @FXML
     private void handleEliminarEncargado(ActionEvent event) {
         String idStr = txtEncargadoId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione el encargado que desea eliminar de la tabla.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un encargado de la tabla para eliminar.");
             return;
         }
 
         int id = Integer.parseInt(idStr.trim());
         String nombre = txtEncargadoNombre.getText() + " " + txtEncargadoApellido.getText();
 
-        if (confirmarAccion("Confirmar Eliminación", "¿Está seguro de eliminar al encargado: " + nombre + "?")) {
-            try {
-                RepositoryFactory.getEncargadoRepository().delete(id);
-                cargarEncargados();
-                cargarEstudiantes(); // Refresca asignaciones de estudiantes
-                limpiarFormularioEncargado();
-                actualizarEstadoGlobal("Encargado ID " + id + " eliminado.");
-                mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Eliminado", "El encargado ha sido eliminado del sistema.");
-            } catch (Exception e) {
-                mostrarAlerta(Alert.AlertType.ERROR, "Error al Eliminar", "No se pudo eliminar el encargado:\n" + e.getMessage());
-            }
+        if (confirmarAccion("Confirmar Eliminación", "¿Desea eliminar al encargado '" + nombre + "' de la lista?")) {
+            encargadoRepo.delete(id);
+            cargarEncargados();
+            cargarEstudiantes();
+            limpiarFormularioEncargado();
+            actualizarEstado("Encargado eliminado de la lista.");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Encargado Eliminado", "Encargado eliminado exitosamente.");
         }
     }
 
@@ -734,13 +631,9 @@ public class PersonasController implements Initializable {
     }
 
     private void filtrarEncargados(String criterio) {
-        try {
-            List<Encargado> resultados = RepositoryFactory.getEncargadoRepository().search(criterio);
-            encargadosObservable.setAll(resultados);
-            lblEncargadoContador.setText("Resultados: " + resultados.size() + " encargados");
-        } catch (Exception e) {
-            System.err.println("Error filtrando encargados: " + e.getMessage());
-        }
+        List<Encargado> resultados = encargadoRepo.search(criterio);
+        encargadosObservable.setAll(resultados);
+        lblEncargadoContador.setText("Resultados: " + resultados.size() + " encargados");
     }
 
     private void cargarEncargadoAlFormulario(Encargado enc) {
@@ -774,7 +667,7 @@ public class PersonasController implements Initializable {
             return false;
         }
         if (cui.trim().length() < 13) {
-            mostrarAlerta(Alert.AlertType.WARNING, "CUI Inválido", "El CUI debe tener 13 dígitos numéricos.");
+            mostrarAlerta(Alert.AlertType.WARNING, "CUI Inválido", "El CUI debe contener al menos 13 dígitos.");
             txtEncargadoCui.requestFocus();
             return false;
         }
@@ -790,17 +683,17 @@ public class PersonasController implements Initializable {
         }
         String parentesco = cbEncargadoParentesco.getValue();
         if (esVacio(parentesco)) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe indicar el parentesco del encargado.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe indicar el parentesco.");
             cbEncargadoParentesco.requestFocus();
             return false;
         }
         if (esVacio(txtEncargadoDireccion.getText())) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "La dirección del encargado es obligatoria.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "La dirección es obligatoria.");
             txtEncargadoDireccion.requestFocus();
             return false;
         }
         if (!esVacio(txtEncargadoEmail.getText()) && !EMAIL_PATTERN.matcher(txtEncargadoEmail.getText().trim()).matches()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "El formato del correo electrónico no es válido.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "Formato de correo electrónico inválido.");
             txtEncargadoEmail.requestFocus();
             return false;
         }
@@ -821,137 +714,11 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // GENERACIÓN DE REPORTES (REQUISITO 2 & 3)
-    // ==========================================
-
-    @FXML
-    private void handleReporteEstudiante(ActionEvent event) {
-        List<Estudiante> lista = estudiantesObservable;
-        StringBuilder sb = new StringBuilder();
-        sb.append("========================================================================================\n");
-        sb.append("                  REPORTE OFICIAL DE ESTUDIANTES REGISTRADOS                           \n");
-        sb.append("                       Sistema de Gestión Escolar - UMG                                \n");
-        sb.append("========================================================================================\n");
-        sb.append("Fecha de Emisión: ").append(LocalDate.now().format(DATE_FORMATTER)).append("\n");
-        sb.append("Total de Estudiantes: ").append(lista.size()).append("\n");
-        sb.append("Modo Persistencia: ").append(RepositoryFactory.getRepositoryType().getDescripcion()).append("\n");
-        sb.append("----------------------------------------------------------------------------------------\n");
-        sb.append(String.format("%-5s | %-14s | %-24s | %-12s | %-20s\n", "ID", "CARNÉ", "NOMBRE COMPLETO", "TELÉFONO", "FECHA NAC."));
-        sb.append("----------------------------------------------------------------------------------------\n");
-
-        for (Estudiante e : lista) {
-            String fecha = e.getFechaNacimiento() != null ? e.getFechaNacimiento().format(DATE_FORMATTER) : "N/A";
-            sb.append(String.format("%-5d | %-14s | %-24s | %-12s | %-20s\n",
-                    e.getId(),
-                    truncar(e.getCarnet(), 14),
-                    truncar(e.getNombreCompleto(), 24),
-                    truncar(e.getTelefono(), 12),
-                    fecha));
-        }
-        sb.append("========================================================================================\n");
-
-        mostrarVentanaReporte("Reporte de Estudiantes", "Resumen Consolidado de Estudiantes", sb.toString());
-    }
-
-    @FXML
-    private void handleReporteDocente(ActionEvent event) {
-        List<Docente> lista = docentesObservable;
-        StringBuilder sb = new StringBuilder();
-        sb.append("========================================================================================\n");
-        sb.append("                   REPORTE OFICIAL DE DOCENTES REGISTRADOS                             \n");
-        sb.append("                       Sistema de Gestión Escolar - UMG                                \n");
-        sb.append("========================================================================================\n");
-        sb.append("Fecha de Emisión: ").append(LocalDate.now().format(DATE_FORMATTER)).append("\n");
-        sb.append("Total de Docentes: ").append(lista.size()).append("\n");
-        sb.append("Modo Persistencia: ").append(RepositoryFactory.getRepositoryType().getDescripcion()).append("\n");
-        sb.append("----------------------------------------------------------------------------------------\n");
-        sb.append(String.format("%-5s | %-12s | %-24s | %-24s | %-12s\n", "ID", "CÓDIGO", "NOMBRE COMPLETO", "ESPECIALIDAD", "TELÉFONO"));
-        sb.append("----------------------------------------------------------------------------------------\n");
-
-        for (Docente d : lista) {
-            sb.append(String.format("%-5d | %-12s | %-24s | %-24s | %-12s\n",
-                    d.getId(),
-                    truncar(d.getCodigoEmpleado(), 12),
-                    truncar(d.getNombreCompleto(), 24),
-                    truncar(d.getEspecialidad(), 24),
-                    truncar(d.getTelefono(), 12)));
-        }
-        sb.append("========================================================================================\n");
-
-        mostrarVentanaReporte("Reporte de Docentes", "Resumen Consolidado de Docentes", sb.toString());
-    }
-
-    @FXML
-    private void handleReporteEncargado(ActionEvent event) {
-        List<Encargado> lista = encargadosObservable;
-        StringBuilder sb = new StringBuilder();
-        sb.append("========================================================================================\n");
-        sb.append("                   REPORTE OFICIAL DE ENCARGADOS REGISTRADOS                           \n");
-        sb.append("                       Sistema de Gestión Escolar - UMG                                \n");
-        sb.append("========================================================================================\n");
-        sb.append("Fecha de Emisión: ").append(LocalDate.now().format(DATE_FORMATTER)).append("\n");
-        sb.append("Total de Encargados: ").append(lista.size()).append("\n");
-        sb.append("Modo Persistencia: ").append(RepositoryFactory.getRepositoryType().getDescripcion()).append("\n");
-        sb.append("----------------------------------------------------------------------------------------\n");
-        sb.append(String.format("%-5s | %-16s | %-22s | %-12s | %-20s\n", "ID", "CUI (DPI)", "NOMBRE COMPLETO", "PARENTESCO", "DIRECCIÓN"));
-        sb.append("----------------------------------------------------------------------------------------\n");
-
-        for (Encargado enc : lista) {
-            sb.append(String.format("%-5d | %-16s | %-22s | %-12s | %-20s\n",
-                    enc.getId(),
-                    truncar(enc.getCui(), 16),
-                    truncar(enc.getNombreCompleto(), 22),
-                    truncar(enc.getParentesco(), 12),
-                    truncar(enc.getDireccion(), 20)));
-        }
-        sb.append("========================================================================================\n");
-
-        mostrarVentanaReporte("Reporte de Encargados", "Resumen Consolidado de Encargados", sb.toString());
-    }
-
-    private void mostrarVentanaReporte(String titulo, String encabezado, String contenido) {
-        Dialog<Void> dialog = new Dialog<>();
-        dialog.setTitle(titulo);
-        dialog.setHeaderText(encabezado);
-
-        TextArea txtReporte = new TextArea(contenido);
-        txtReporte.setEditable(false);
-        txtReporte.setStyle("-fx-font-family: 'Courier New', Monospaced; -fx-font-size: 12px; -fx-background-color: #f8fafc;");
-        txtReporte.setPrefSize(720, 420);
-
-        Button btnCopiar = new Button("📋 Copiar Reporte");
-        btnCopiar.getStyleClass().addAll("btn", "btn-reporte");
-        btnCopiar.setOnAction(e -> {
-            Clipboard clipboard = Clipboard.getSystemClipboard();
-            ClipboardContent content = new ClipboardContent();
-            content.putString(contenido);
-            clipboard.setContent(content);
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Copiado", "El reporte ha sido copiado al portapapeles.");
-        });
-
-        HBox buttonBar = new HBox(10, btnCopiar);
-        buttonBar.setAlignment(Pos.CENTER_RIGHT);
-
-        VBox layout = new VBox(10, txtReporte, buttonBar);
-        layout.setPadding(new Insets(10));
-        dialog.getDialogPane().setContent(layout);
-        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
-
-        dialog.showAndWait();
-    }
-
-    // ==========================================
     // MÉTODOS DE UTILIDAD
     // ==========================================
 
     private boolean esVacio(String str) {
         return str == null || str.trim().isEmpty();
-    }
-
-    private String truncar(String str, int maxLen) {
-        if (str == null) return "";
-        if (str.length() <= maxLen) return str;
-        return str.substring(0, maxLen - 3) + "...";
     }
 
     private void mostrarAlerta(Alert.AlertType tipo, String titulo, String mensaje) {

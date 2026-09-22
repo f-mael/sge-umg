@@ -18,23 +18,18 @@
 <?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="720.0" prefWidth="1180.0" stylesheets="@../styles/personas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gt.edu.umg.gestionescolar.controller.PersonasController">
+<BorderPane prefHeight="700.0" prefWidth="1160.0" stylesheets="@../styles/personas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gt.edu.umg.gestionescolar.controller.PersonasController">
    <top>
       <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="header-bar" BorderPane.alignment="CENTER">
          <children>
             <VBox spacing="2.0">
                <children>
                   <Label styleClass="header-title" text="🎓 Sistema de Gestión Escolar (SGE)" />
-                  <Label styleClass="header-subtitle" text="Universidad Mariano Gálvez de Guatemala • Módulo Base y Personas (Programación II)" />
+                  <Label styleClass="header-subtitle" text="Universidad Mariano Gálvez de Guatemala • Módulo Base y Personas (Entregable 2 - Listas en Memoria)" />
                </children>
             </VBox>
             <Pane HBox.hgrow="ALWAYS" />
-            <HBox alignment="CENTER" spacing="10.0" styleClass="persistence-box">
-               <children>
-                  <Label style="-fx-text-fill: #e2e8f0; -fx-font-weight: bold;" text="Modo Persistencia:" />
-                  <ComboBox fx:id="cbPersistencia" onAction="#handleCambioPersistencia" styleClass="persistence-combo" />
-               </children>
-            </HBox>
+            <Label style="-fx-text-fill: #93c5fd; -fx-font-weight: bold; -fx-font-size: 13px;" text="📌 Almacenamiento: ArrayList (En Memoria)" />
          </children>
       </HBox>
    </top>
@@ -114,23 +109,17 @@
                           <!-- Grid / TableView Estudiantes -->
                           <VBox spacing="10.0" styleClass="card-panel" HBox.hgrow="ALWAYS">
                              <children>
-                                <HBox alignment="CENTER_LEFT">
-                                   <children>
-                                      <Label styleClass="card-title" text="Listado General de Estudiantes" />
-                                      <Pane HBox.hgrow="ALWAYS" />
-                                      <Button onAction="#handleReporteEstudiante" styleClass="btn, btn-reporte" text="📄 Generar Reporte" />
-                                   </children>
-                                </HBox>
+                                <Label styleClass="card-title" text="Listado General de Estudiantes" />
                                 <TableView fx:id="tblEstudiantes" VBox.vgrow="ALWAYS">
                                   <columns>
                                     <TableColumn fx:id="colEstudianteId" prefWidth="45.0" text="ID" />
-                                    <TableColumn fx:id="colEstudianteCarnet" prefWidth="105.0" text="Carné" />
-                                    <TableColumn fx:id="colEstudianteNombre" prefWidth="120.0" text="Nombre" />
-                                    <TableColumn fx:id="colEstudianteApellido" prefWidth="120.0" text="Apellido" />
+                                    <TableColumn fx:id="colEstudianteCarnet" prefWidth="110.0" text="Carné" />
+                                    <TableColumn fx:id="colEstudianteNombre" prefWidth="125.0" text="Nombre" />
+                                    <TableColumn fx:id="colEstudianteApellido" prefWidth="125.0" text="Apellido" />
                                     <TableColumn fx:id="colEstudianteTelefono" prefWidth="95.0" text="Teléfono" />
-                                    <TableColumn fx:id="colEstudianteEmail" prefWidth="150.0" text="Correo Electrónico" />
-                                    <TableColumn fx:id="colEstudianteFechaNac" prefWidth="95.0" text="Fecha Nac." />
-                                    <TableColumn fx:id="colEstudianteEncargado" prefWidth="130.0" text="Encargado Asignado" />
+                                    <TableColumn fx:id="colEstudianteEmail" prefWidth="160.0" text="Correo Electrónico" />
+                                    <TableColumn fx:id="colEstudianteFechaNac" prefWidth="100.0" text="Fecha Nac." />
+                                    <TableColumn fx:id="colEstudianteEncargado" prefWidth="140.0" text="Encargado Asignado" />
                                   </columns>
                                   <columnResizePolicy>
                                      <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -215,20 +204,14 @@
                           <!-- Grid / TableView Docentes -->
                           <VBox spacing="10.0" styleClass="card-panel" HBox.hgrow="ALWAYS">
                              <children>
-                                <HBox alignment="CENTER_LEFT">
-                                   <children>
-                                      <Label styleClass="card-title" text="Listado General de Docentes" />
-                                      <Pane HBox.hgrow="ALWAYS" />
-                                      <Button onAction="#handleReporteDocente" styleClass="btn, btn-reporte" text="📄 Generar Reporte" />
-                                   </children>
-                                </HBox>
+                                <Label styleClass="card-title" text="Listado General de Docentes" />
                                 <TableView fx:id="tblDocentes" VBox.vgrow="ALWAYS">
                                   <columns>
                                     <TableColumn fx:id="colDocenteId" prefWidth="45.0" text="ID" />
                                     <TableColumn fx:id="colDocenteCodigo" prefWidth="110.0" text="Código" />
                                     <TableColumn fx:id="colDocenteNombre" prefWidth="130.0" text="Nombre" />
                                     <TableColumn fx:id="colDocenteApellido" prefWidth="130.0" text="Apellido" />
-                                    <TableColumn fx:id="colDocenteEspecialidad" prefWidth="150.0" text="Especialidad" />
+                                    <TableColumn fx:id="colDocenteEspecialidad" prefWidth="160.0" text="Especialidad" />
                                     <TableColumn fx:id="colDocenteTelefono" prefWidth="100.0" text="Teléfono" />
                                     <TableColumn fx:id="colDocenteEmail" prefWidth="160.0" text="Correo Electrónico" />
                                   </columns>
@@ -318,13 +301,7 @@
                           <!-- Grid / TableView Encargados -->
                           <VBox spacing="10.0" styleClass="card-panel" HBox.hgrow="ALWAYS">
                              <children>
-                                <HBox alignment="CENTER_LEFT">
-                                   <children>
-                                      <Label styleClass="card-title" text="Listado General de Encargados" />
-                                      <Pane HBox.hgrow="ALWAYS" />
-                                      <Button onAction="#handleReporteEncargado" styleClass="btn, btn-reporte" text="📄 Generar Reporte" />
-                                   </children>
-                                </HBox>
+                                <Label styleClass="card-title" text="Listado General de Encargados" />
                                 <TableView fx:id="tblEncargados" VBox.vgrow="ALWAYS">
                                   <columns>
                                     <TableColumn fx:id="colEncargadoId" prefWidth="45.0" text="ID" />
@@ -333,7 +310,7 @@
                                     <TableColumn fx:id="colEncargadoApellido" prefWidth="120.0" text="Apellido" />
                                     <TableColumn fx:id="colEncargadoParentesco" prefWidth="90.0" text="Parentesco" />
                                     <TableColumn fx:id="colEncargadoTelefono" prefWidth="95.0" text="Teléfono" />
-                                    <TableColumn fx:id="colEncargadoEmail" prefWidth="140.0" text="Correo Electrónico" />
+                                    <TableColumn fx:id="colEncargadoEmail" prefWidth="150.0" text="Correo Electrónico" />
                                     <TableColumn fx:id="colEncargadoDireccion" prefWidth="150.0" text="Dirección" />
                                   </columns>
                                   <columnResizePolicy>
@@ -354,9 +331,9 @@
    <bottom>
       <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="status-bar" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="lblEstadoSistema" styleClass="status-label" text="Sistema listo. Conectado." />
+            <Label fx:id="lblEstadoSistema" styleClass="status-label" text="Sistema listo. Almacenamiento en memoria (ArrayList)." />
             <Pane HBox.hgrow="ALWAYS" />
-            <Label fx:id="lblPersistenciaActiva" styleClass="status-label" text="Persistencia: Base de Datos SQLite (Entregable 3)" />
+            <Label styleClass="status-label" text="Entregable 2 • Programación II - UMG" />
          </children>
       </HBox>
    </bottom>

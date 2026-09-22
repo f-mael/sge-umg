@@ -1,159 +1,78 @@
 package gt.edu.umg.gestionescolar.repository;
 
 import gt.edu.umg.gestionescolar.model.Encargado;
-import gt.edu.umg.gestionescolar.util.DatabaseManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+/**
+ * Repositorio de Encargados con almacenamiento en memoria utilizando listas de objetos (ArrayList).
+ * Cumple estrictamente con el Entregable 2 de Programación II.
+ */
 public class EncargadoRepository implements Repository<Encargado> {
 
+    private final List<Encargado> encargados = new ArrayList<>();
+    private int nextId = 1;
+
+    public EncargadoRepository() {
+        // Datos iniciales en memoria para demostración del Entregable 2
+        save(new Encargado(0, "Juan", "López", "5555-1111", "juan.lopez@gmail.com", "2456789010101", "Padre", "Zona 1, Ciudad de Guatemala"));
+        save(new Encargado(0, "Elena", "Gómez", "5555-2222", "elena.gomez@gmail.com", "3012456780101", "Madre", "Zona 11, Mixco, Guatemala"));
+    }
+
     @Override
-    public void save(Encargado encargado) {
-        String sql = """
-            INSERT INTO encargados (nombre, apellido, telefono, email, cui, parentesco, direccion)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """;
+    public synchronized void save(Encargado encargado) {
+        if (encargado.getId() <= 0) {
+            encargado.setId(nextId++);
+        } else if (encargado.getId() >= nextId) {
+            nextId = encargado.getId() + 1;
+        }
+        encargados.add(encargado);
+    }
 
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
-            stmt.setString(1, encargado.getNombre());
-            stmt.setString(2, encargado.getApellido());
-            stmt.setString(3, encargado.getTelefono());
-            stmt.setString(4, encargado.getEmail());
-            stmt.setString(5, encargado.getCui());
-            stmt.setString(6, encargado.getParentesco());
-            stmt.setString(7, encargado.getDireccion());
-
-            stmt.executeUpdate();
-
-            try (ResultSet rs = stmt.getGeneratedKeys()) {
-                if (rs.next()) {
-                    encargado.setId(rs.getInt(1));
-                }
+    @Override
+    public synchronized void update(Encargado encargado) {
+        for (int i = 0; i < encargados.size(); i++) {
+            if (encargados.get(i).getId() == encargado.getId()) {
+                encargados.set(i, encargado);
+                return;
             }
-        } catch (SQLException e) {
-            System.err.println("Error al guardar encargado: " + e.getMessage());
         }
     }
 
     @Override
-    public void update(Encargado encargado) {
-        String sql = """
-            UPDATE encargados
-            SET nombre = ?, apellido = ?, telefono = ?, email = ?, cui = ?, parentesco = ?, direccion = ?
-            WHERE id = ?
-        """;
-
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setString(1, encargado.getNombre());
-            stmt.setString(2, encargado.getApellido());
-            stmt.setString(3, encargado.getTelefono());
-            stmt.setString(4, encargado.getEmail());
-            stmt.setString(5, encargado.getCui());
-            stmt.setString(6, encargado.getParentesco());
-            stmt.setString(7, encargado.getDireccion());
-            stmt.setInt(8, encargado.getId());
-
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Error al actualizar encargado: " + e.getMessage());
-        }
+    public synchronized void delete(int id) {
+        encargados.removeIf(e -> e.getId() == id);
     }
 
     @Override
-    public void delete(int id) {
-        String sql = "DELETE FROM encargados WHERE id = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            System.err.println("Error al eliminar encargado: " + e.getMessage());
-        }
+    public synchronized Optional<Encargado> findById(int id) {
+        return encargados.stream()
+                .filter(e -> e.getId() == id)
+                .findFirst();
     }
 
     @Override
-    public Optional<Encargado> findById(int id) {
-        String sql = "SELECT * FROM encargados WHERE id = ?";
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    return Optional.of(mapResultSetToEncargado(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al buscar encargado por ID: " + e.getMessage());
-        }
-        return Optional.empty();
+    public synchronized List<Encargado> findAll() {
+        return new ArrayList<>(encargados);
     }
 
     @Override
-    public List<Encargado> findAll() {
-        List<Encargado> lista = new ArrayList<>();
-        String sql = "SELECT * FROM encargados ORDER BY apellido, nombre";
-
-        try (Connection conn = DatabaseManager.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
-            while (rs.next()) {
-                lista.add(mapResultSetToEncargado(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al listar encargados: " + e.getMessage());
-        }
-        return lista;
-    }
-
-    @Override
-    public List<Encargado> search(String criterio) {
+    public synchronized List<Encargado> search(String criterio) {
         if (criterio == null || criterio.isBlank()) {
             return findAll();
         }
-        List<Encargado> lista = new ArrayList<>();
-        String sql = """
-            SELECT * FROM encargados 
-            WHERE nombre LIKE ? OR apellido LIKE ? OR cui LIKE ? OR parentesco LIKE ? OR direccion LIKE ? OR email LIKE ? OR telefono LIKE ?
-            ORDER BY apellido, nombre
-        """;
-        try (Connection conn = DatabaseManager.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            String pattern = "%" + criterio.trim() + "%";
-            for (int i = 1; i <= 7; i++) {
-                stmt.setString(i, pattern);
-            }
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    lista.add(mapResultSetToEncargado(rs));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error al buscar encargados: " + e.getMessage());
-        }
-        return lista;
-    }
-
-    private Encargado mapResultSetToEncargado(ResultSet rs) throws SQLException {
-        return new Encargado(
-            rs.getInt("id"),
-            rs.getString("nombre"),
-            rs.getString("apellido"),
-            rs.getString("telefono"),
-            rs.getString("email"),
-            rs.getString("cui"),
-            rs.getString("parentesco"),
-            rs.getString("direccion")
-        );
+        String crit = criterio.trim().toLowerCase();
+        return encargados.stream()
+                .filter(e -> (e.getNombre() != null && e.getNombre().toLowerCase().contains(crit))
+                        || (e.getApellido() != null && e.getApellido().toLowerCase().contains(crit))
+                        || (e.getCui() != null && e.getCui().toLowerCase().contains(crit))
+                        || (e.getParentesco() != null && e.getParentesco().toLowerCase().contains(crit))
+                        || (e.getDireccion() != null && e.getDireccion().toLowerCase().contains(crit))
+                        || (e.getEmail() != null && e.getEmail().toLowerCase().contains(crit))
+                        || (e.getTelefono() != null && e.getTelefono().toLowerCase().contains(crit)))
+                .collect(Collectors.toList());
     }
 }

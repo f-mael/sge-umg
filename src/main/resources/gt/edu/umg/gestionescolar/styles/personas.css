@@ -42,21 +42,6 @@
     -fx-font-size: 12px;
 }
 
-/* Switch de Persistencia */
-.persistence-box {
-    -fx-background-color: rgba(15, 23, 42, 0.4);
-    -fx-background-radius: 8px;
-    -fx-padding: 4px 10px;
-    -fx-alignment: center;
-}
-
-.persistence-combo {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 6px;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-pref-width: 280px;
-}
 
 /* TabPane Moderno */
 .tab-pane {
@@ -214,13 +199,6 @@
     -fx-background-color: #475569;
 }
 
-.btn-reporte {
-    -fx-background-color: #0284c7;
-    -fx-text-fill: #ffffff;
-}
-.btn-reporte:hover {
-    -fx-background-color: #0369a1;
-}
 
 /* TableView */
 .table-view {
