@@ -26,21 +26,20 @@ import java.util.regex.Pattern;
 
 /**
  * Controlador principal para el Módulo Base y Personas.
- * Opera 100% con almacenamiento en memoria mediante listas de objetos (ArrayList).
- * Cumple con los requerimientos del Entregable 2 (Programación II).
+ * Gestiona de forma profesional el CRUD, validaciones y búsquedas para
+ * Estudiantes, Docentes y Encargados.
  */
 public class PersonasController implements Initializable {
 
-    // Repositorios en memoria basados en ArrayList
+    // Repositorios basados en listas en memoria
     private final Repository<Estudiante> estudianteRepo = new EstudianteRepository();
     private final Repository<Docente> docenteRepo = new DocenteRepository();
     private final Repository<Encargado> encargadoRepo = new EncargadoRepository();
 
     // ==========================================
-    // CONTROLES DE CABECERA Y ESTADO
+    // CONTROLES DE INTERFAZ
     // ==========================================
     @FXML private TabPane tabPanePrincipal;
-    @FXML private Label lblEstadoSistema;
 
     // ==========================================
     // PESTAÑA 1: ESTUDIANTES
@@ -112,7 +111,7 @@ public class PersonasController implements Initializable {
     @FXML private TableColumn<Encargado, String> colEncargadoEmail;
     @FXML private TableColumn<Encargado, String> colEncargadoDireccion;
 
-    // Listas observables para las tablas
+    // Listas observables enlazadas a las tablas
     private final ObservableList<Estudiante> estudiantesObservable = FXCollections.observableArrayList();
     private final ObservableList<Docente> docentesObservable = FXCollections.observableArrayList();
     private final ObservableList<Encargado> encargadosObservable = FXCollections.observableArrayList();
@@ -154,7 +153,7 @@ public class PersonasController implements Initializable {
             return new SimpleStringProperty(enc.map(e -> e.getNombreCompleto() + " (" + e.getParentesco() + ")").orElse("ID: " + idEnc));
         });
         tblEstudiantes.setItems(estudiantesObservable);
-        tblEstudiantes.setPlaceholder(new Label("No hay estudiantes registrados en memoria."));
+        tblEstudiantes.setPlaceholder(new Label("No se encontraron registros de estudiantes."));
 
         // Tabla Docentes
         colDocenteId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -165,7 +164,7 @@ public class PersonasController implements Initializable {
         colDocenteTelefono.setCellValueFactory(new PropertyValueFactory<>("telefono"));
         colDocenteEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         tblDocentes.setItems(docentesObservable);
-        tblDocentes.setPlaceholder(new Label("No hay docentes registrados en memoria."));
+        tblDocentes.setPlaceholder(new Label("No se encontraron registros de docentes."));
 
         // Tabla Encargados
         colEncargadoId.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -177,7 +176,7 @@ public class PersonasController implements Initializable {
         colEncargadoEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
         colEncargadoDireccion.setCellValueFactory(new PropertyValueFactory<>("direccion"));
         tblEncargados.setItems(encargadosObservable);
-        tblEncargados.setPlaceholder(new Label("No hay encargados registrados en memoria."));
+        tblEncargados.setPlaceholder(new Label("No se encontraron registros de encargados."));
     }
 
     private void configurarComboBoxes() {
@@ -229,14 +228,13 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // CARGA Y REFRESH DE DATOS EN MEMORIA
+    // CARGA Y REFRESH DE DATOS
     // ==========================================
 
     private void cargarDatosGenerales() {
         cargarEncargados();
         cargarEstudiantes();
         cargarDocentes();
-        actualizarEstado("Datos en memoria sincronizados.");
     }
 
     private void cargarEstudiantes() {
@@ -263,12 +261,8 @@ public class PersonasController implements Initializable {
         cbEstudianteEncargado.setItems(FXCollections.observableArrayList(comboList));
     }
 
-    private void actualizarEstado(String mensaje) {
-        lblEstadoSistema.setText(mensaje + " | Almacenamiento: ArrayList");
-    }
-
     // ==========================================
-    // CRUD: ESTUDIANTES (MEMORIA)
+    // CRUD: ESTUDIANTES
     // ==========================================
 
     @FXML
@@ -280,15 +274,14 @@ public class PersonasController implements Initializable {
 
         cargarEstudiantes();
         limpiarFormularioEstudiante();
-        actualizarEstado("Estudiante agregado a la lista en memoria.");
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Estudiante Agregado", "Estudiante agregado con éxito a la lista en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Exitoso", "El estudiante ha sido registrado exitosamente.");
     }
 
     @FXML
     private void handleActualizarEstudiante(ActionEvent event) {
         String idStr = txtEstudianteId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un estudiante de la tabla para modificar.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un estudiante de la tabla para actualizar.");
             return;
         }
 
@@ -300,8 +293,7 @@ public class PersonasController implements Initializable {
 
         cargarEstudiantes();
         limpiarFormularioEstudiante();
-        actualizarEstado("Estudiante modificado en memoria.");
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Estudiante Modificado", "Los datos del estudiante han sido modificados.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Actualización Exitosa", "Los datos del estudiante han sido actualizados.");
     }
 
     @FXML
@@ -315,12 +307,11 @@ public class PersonasController implements Initializable {
         int id = Integer.parseInt(idStr.trim());
         String nombre = txtEstudianteNombre.getText() + " " + txtEstudianteApellido.getText();
 
-        if (confirmarAccion("Confirmar Eliminación", "¿Desea eliminar al estudiante '" + nombre + "' de la lista?")) {
+        if (confirmarAccion("Confirmar Eliminación", "¿Está seguro de eliminar al estudiante: " + nombre + "?")) {
             estudianteRepo.delete(id);
             cargarEstudiantes();
             limpiarFormularioEstudiante();
-            actualizarEstado("Estudiante eliminado de la lista.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Estudiante Eliminado", "Estudiante eliminado exitosamente.");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Eliminado", "El estudiante ha sido eliminado del sistema.");
         }
     }
 
@@ -338,7 +329,7 @@ public class PersonasController implements Initializable {
     private void filtrarEstudiantes(String criterio) {
         List<Estudiante> resultados = estudianteRepo.search(criterio);
         estudiantesObservable.setAll(resultados);
-        lblEstudianteContador.setText("Resultados: " + resultados.size() + " estudiantes");
+        lblEstudianteContador.setText("Total: " + resultados.size() + " estudiantes");
     }
 
     private void cargarEstudianteAlFormulario(Estudiante est) {
@@ -391,17 +382,17 @@ public class PersonasController implements Initializable {
             return false;
         }
         if (dpEstudianteFechaNac.getValue() == null) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe seleccionar la fecha de nacimiento.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe seleccionar una fecha de nacimiento.");
             dpEstudianteFechaNac.requestFocus();
             return false;
         }
         if (dpEstudianteFechaNac.getValue().isAfter(LocalDate.now())) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Fecha Inválida", "La fecha de nacimiento no puede ser futura.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Fecha Inválida", "La fecha de nacimiento no puede ser una fecha futura.");
             dpEstudianteFechaNac.requestFocus();
             return false;
         }
         if (!esVacio(txtEstudianteEmail.getText()) && !EMAIL_PATTERN.matcher(txtEstudianteEmail.getText().trim()).matches()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "Formato de correo inválido (ej. alumno@miumg.edu.gt).");
+            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "El formato del correo electrónico es incorrecto.");
             txtEstudianteEmail.requestFocus();
             return false;
         }
@@ -425,7 +416,7 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // CRUD: DOCENTES (MEMORIA)
+    // CRUD: DOCENTES
     // ==========================================
 
     @FXML
@@ -437,15 +428,14 @@ public class PersonasController implements Initializable {
 
         cargarDocentes();
         limpiarFormularioDocente();
-        actualizarEstado("Docente agregado a la lista en memoria.");
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Docente Agregado", "Docente agregado con éxito a la lista en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Exitoso", "El docente ha sido registrado exitosamente.");
     }
 
     @FXML
     private void handleActualizarDocente(ActionEvent event) {
         String idStr = txtDocenteId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un docente de la tabla para modificar.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un docente de la tabla para actualizar.");
             return;
         }
 
@@ -457,8 +447,7 @@ public class PersonasController implements Initializable {
 
         cargarDocentes();
         limpiarFormularioDocente();
-        actualizarEstado("Docente modificado en memoria.");
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Docente Modificado", "Los datos del docente han sido modificados.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Actualización Exitosa", "Los datos del docente han sido actualizados.");
     }
 
     @FXML
@@ -472,12 +461,11 @@ public class PersonasController implements Initializable {
         int id = Integer.parseInt(idStr.trim());
         String nombre = txtDocenteNombre.getText() + " " + txtDocenteApellido.getText();
 
-        if (confirmarAccion("Confirmar Eliminación", "¿Desea eliminar al docente '" + nombre + "' de la lista?")) {
+        if (confirmarAccion("Confirmar Eliminación", "¿Está seguro de eliminar al docente: " + nombre + "?")) {
             docenteRepo.delete(id);
             cargarDocentes();
             limpiarFormularioDocente();
-            actualizarEstado("Docente eliminado de la lista.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Docente Eliminado", "Docente eliminado exitosamente.");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Eliminado", "El docente ha sido eliminado del sistema.");
         }
     }
 
@@ -495,7 +483,7 @@ public class PersonasController implements Initializable {
     private void filtrarDocentes(String criterio) {
         List<Docente> resultados = docenteRepo.search(criterio);
         docentesObservable.setAll(resultados);
-        lblDocenteContador.setText("Resultados: " + resultados.size() + " docentes");
+        lblDocenteContador.setText("Total: " + resultados.size() + " docentes");
     }
 
     private void cargarDocenteAlFormulario(Docente doc) {
@@ -541,7 +529,7 @@ public class PersonasController implements Initializable {
             return false;
         }
         if (!esVacio(txtDocenteEmail.getText()) && !EMAIL_PATTERN.matcher(txtDocenteEmail.getText().trim()).matches()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "Formato de correo electrónico inválido.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "El formato del correo electrónico es incorrecto.");
             txtDocenteEmail.requestFocus();
             return false;
         }
@@ -561,7 +549,7 @@ public class PersonasController implements Initializable {
     }
 
     // ==========================================
-    // CRUD: ENCARGADOS (MEMORIA)
+    // CRUD: ENCARGADOS
     // ==========================================
 
     @FXML
@@ -573,15 +561,14 @@ public class PersonasController implements Initializable {
 
         cargarEncargados();
         limpiarFormularioEncargado();
-        actualizarEstado("Encargado agregado a la lista en memoria.");
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Encargado Agregado", "Encargado agregado con éxito a la lista en memoria.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Exitoso", "El encargado ha sido registrado exitosamente.");
     }
 
     @FXML
     private void handleActualizarEncargado(ActionEvent event) {
         String idStr = txtEncargadoId.getText();
         if (idStr == null || idStr.isBlank()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un encargado de la tabla para modificar.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Selección Requerida", "Seleccione un encargado de la tabla para actualizar.");
             return;
         }
 
@@ -594,8 +581,7 @@ public class PersonasController implements Initializable {
         cargarEncargados();
         cargarEstudiantes(); // Refresca nombres de encargados en la tabla de estudiantes
         limpiarFormularioEncargado();
-        actualizarEstado("Encargado modificado en memoria.");
-        mostrarAlerta(Alert.AlertType.INFORMATION, "Encargado Modificado", "Los datos del encargado han sido modificados.");
+        mostrarAlerta(Alert.AlertType.INFORMATION, "Actualización Exitosa", "Los datos del encargado han sido actualizados.");
     }
 
     @FXML
@@ -609,13 +595,12 @@ public class PersonasController implements Initializable {
         int id = Integer.parseInt(idStr.trim());
         String nombre = txtEncargadoNombre.getText() + " " + txtEncargadoApellido.getText();
 
-        if (confirmarAccion("Confirmar Eliminación", "¿Desea eliminar al encargado '" + nombre + "' de la lista?")) {
+        if (confirmarAccion("Confirmar Eliminación", "¿Está seguro de eliminar al encargado: " + nombre + "?")) {
             encargadoRepo.delete(id);
             cargarEncargados();
             cargarEstudiantes();
             limpiarFormularioEncargado();
-            actualizarEstado("Encargado eliminado de la lista.");
-            mostrarAlerta(Alert.AlertType.INFORMATION, "Encargado Eliminado", "Encargado eliminado exitosamente.");
+            mostrarAlerta(Alert.AlertType.INFORMATION, "Registro Eliminado", "El encargado ha sido eliminado del sistema.");
         }
     }
 
@@ -633,7 +618,7 @@ public class PersonasController implements Initializable {
     private void filtrarEncargados(String criterio) {
         List<Encargado> resultados = encargadoRepo.search(criterio);
         encargadosObservable.setAll(resultados);
-        lblEncargadoContador.setText("Resultados: " + resultados.size() + " encargados");
+        lblEncargadoContador.setText("Total: " + resultados.size() + " encargados");
     }
 
     private void cargarEncargadoAlFormulario(Encargado enc) {
@@ -683,17 +668,17 @@ public class PersonasController implements Initializable {
         }
         String parentesco = cbEncargadoParentesco.getValue();
         if (esVacio(parentesco)) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe indicar el parentesco.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "Debe indicar el parentesco del encargado.");
             cbEncargadoParentesco.requestFocus();
             return false;
         }
         if (esVacio(txtEncargadoDireccion.getText())) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "La dirección es obligatoria.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Campo Requerido", "La dirección del encargado es obligatoria.");
             txtEncargadoDireccion.requestFocus();
             return false;
         }
         if (!esVacio(txtEncargadoEmail.getText()) && !EMAIL_PATTERN.matcher(txtEncargadoEmail.getText().trim()).matches()) {
-            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "Formato de correo electrónico inválido.");
+            mostrarAlerta(Alert.AlertType.WARNING, "Correo Inválido", "El formato del correo electrónico es incorrecto.");
             txtEncargadoEmail.requestFocus();
             return false;
         }

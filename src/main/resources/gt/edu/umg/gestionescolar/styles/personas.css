@@ -244,16 +244,3 @@
     -fx-background-color: #bfdbfe;
     -fx-text-fill: #1e3a8a;
 }
-
-/* Barra de Estado Inferior */
-.status-bar {
-    -fx-background-color: #e2e8f0;
-    -fx-padding: 6px 18px;
-    -fx-border-color: #cbd5e1;
-    -fx-border-width: 1 0 0 0;
-}
-
-.status-label {
-    -fx-font-size: 11px;
-    -fx-text-fill: #475569;
-}

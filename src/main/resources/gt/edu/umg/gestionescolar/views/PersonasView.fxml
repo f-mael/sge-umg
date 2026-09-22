@@ -25,11 +25,9 @@
             <VBox spacing="2.0">
                <children>
                   <Label styleClass="header-title" text="🎓 Sistema de Gestión Escolar (SGE)" />
-                  <Label styleClass="header-subtitle" text="Universidad Mariano Gálvez de Guatemala • Módulo Base y Personas (Entregable 2 - Listas en Memoria)" />
+                  <Label styleClass="header-subtitle" text="Universidad Mariano Gálvez de Guatemala • Campus Cobán" />
                </children>
             </VBox>
-            <Pane HBox.hgrow="ALWAYS" />
-            <Label style="-fx-text-fill: #93c5fd; -fx-font-weight: bold; -fx-font-size: 13px;" text="📌 Almacenamiento: ArrayList (En Memoria)" />
          </children>
       </HBox>
    </top>
@@ -328,13 +326,4 @@
         </tabs>
       </TabPane>
    </center>
-   <bottom>
-      <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="status-bar" BorderPane.alignment="CENTER">
-         <children>
-            <Label fx:id="lblEstadoSistema" styleClass="status-label" text="Sistema listo. Almacenamiento en memoria (ArrayList)." />
-            <Pane HBox.hgrow="ALWAYS" />
-            <Label styleClass="status-label" text="Entregable 2 • Programación II - UMG" />
-         </children>
-      </HBox>
-   </bottom>
 </BorderPane>

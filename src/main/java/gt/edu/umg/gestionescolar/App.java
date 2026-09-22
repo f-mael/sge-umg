@@ -33,7 +33,7 @@ public class App extends Application {
             // Configurar escena y dimensiones de la ventana principal
             Scene scene = new Scene(root, 1160, 700);
 
-            stage.setTitle("Sistema de Gestión Escolar - Módulo Base y Personas (Entregable 2) | UMG");
+            stage.setTitle("Sistema de Gestión Escolar - SGE");
             stage.setMinWidth(960);
             stage.setMinHeight(600);
             stage.setScene(scene);
