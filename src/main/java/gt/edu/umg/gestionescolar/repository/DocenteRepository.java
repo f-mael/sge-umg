@@ -114,6 +114,34 @@ public class DocenteRepository implements Repository<Docente> {
         return lista;
     }
 
+    @Override
+    public List<Docente> search(String criterio) {
+        if (criterio == null || criterio.isBlank()) {
+            return findAll();
+        }
+        List<Docente> lista = new ArrayList<>();
+        String sql = """
+            SELECT * FROM docentes 
+            WHERE nombre LIKE ? OR apellido LIKE ? OR codigo_empleado LIKE ? OR especialidad LIKE ? OR email LIKE ? OR telefono LIKE ?
+            ORDER BY apellido, nombre
+        """;
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String pattern = "%" + criterio.trim() + "%";
+            for (int i = 1; i <= 6; i++) {
+                stmt.setString(i, pattern);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapResultSetToDocente(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar docentes: " + e.getMessage());
+        }
+        return lista;
+    }
+
     private Docente mapResultSetToDocente(ResultSet rs) throws SQLException {
         return new Docente(
             rs.getInt("id"),

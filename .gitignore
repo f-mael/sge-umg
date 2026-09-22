@@ -38,3 +38,7 @@ nbbuild/
 dist/
 nbdist/
 .nb-gradle/
+
+# SQLite
+*.db
+*.db-journal

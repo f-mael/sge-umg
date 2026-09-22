@@ -23,4 +23,12 @@ public class Encargado extends Persona {
 
     public String getDireccion() { return direccion; }
     public void setDireccion(String direccion) { this.direccion = direccion; }
+
+    @Override
+    public String toString() {
+        if (id <= 0 && (nombre == null || nombre.isBlank())) {
+            return "-- Ninguno --";
+        }
+        return getNombreCompleto() + " (" + (parentesco != null ? parentesco : "Encargado") + ")";
+    }
 }

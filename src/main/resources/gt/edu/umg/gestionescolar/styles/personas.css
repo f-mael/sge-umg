@@ -1,0 +1,281 @@
+/* ==========================================================================
+   ESTILOS VISUALES MODERNOS - SISTEMA DE GESTIÓN ESCOLAR (UMG)
+   Módulo Base y Personas
+   ========================================================================== */
+
+/* Variables y raíz */
+.root {
+    -fx-font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #f1f5f9;
+}
+
+/* Encabezado Superior */
+.header-bar {
+    -fx-background-color: linear-gradient(to right, #0f172a, #1e3a8a, #0369a1);
+    -fx-padding: 16px 24px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 8, 0, 0, 3);
+}
+
+.header-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.header-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: #93c5fd;
+}
+
+.header-badge {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 20px;
+    -fx-padding: 6px 14px;
+    -fx-border-color: rgba(255, 255, 255, 0.3);
+    -fx-border-radius: 20px;
+}
+
+.header-badge-label {
+    -fx-text-fill: #f8fafc;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+/* Switch de Persistencia */
+.persistence-box {
+    -fx-background-color: rgba(15, 23, 42, 0.4);
+    -fx-background-radius: 8px;
+    -fx-padding: 4px 10px;
+    -fx-alignment: center;
+}
+
+.persistence-combo {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-pref-width: 280px;
+}
+
+/* TabPane Moderno */
+.tab-pane {
+    -fx-tab-min-width: 140px;
+    -fx-tab-max-width: 200px;
+    -fx-tab-min-height: 40px;
+    -fx-background-color: #f8fafc;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: #e2e8f0;
+    -fx-padding: 6px 12px 0 12px;
+}
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: #cbd5e1;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-padding: 8px 18px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.tab-pane .tab:hover {
+    -fx-background-color: #94a3b8;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #ffffff;
+    -fx-focus-color: transparent;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #334155;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #1e3a8a;
+}
+
+/* Tarjetas y Contenedores */
+.card-panel {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10px;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.04), 6, 0, 0, 2);
+}
+
+.card-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1e293b;
+    -fx-padding: 0 0 8px 0;
+}
+
+/* Barra de Búsqueda */
+.search-bar {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 8px;
+    -fx-padding: 8px 14px;
+    -fx-alignment: center-left;
+}
+
+.search-field {
+    -fx-background-color: #f8fafc;
+    -fx-background-radius: 6px;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 6px;
+    -fx-padding: 7px 12px;
+    -fx-font-size: 13px;
+    -fx-pref-width: 320px;
+}
+
+.search-field:focused {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #3b82f6;
+    -fx-effect: dropshadow(three-pass-box, rgba(59,130,246,0.25), 4, 0, 0, 0);
+}
+
+/* Formularios */
+.form-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #475569;
+}
+
+.form-label-required {
+    -fx-text-fill: #dc2626;
+    -fx-font-weight: bold;
+}
+
+.text-field, .combo-box, .date-picker {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 6px;
+    -fx-border-color: #cbd5e1;
+    -fx-border-radius: 6px;
+    -fx-padding: 6px 10px;
+    -fx-font-size: 13px;
+}
+
+.text-field:focused, .combo-box:focused, .date-picker:focused {
+    -fx-border-color: #2563eb;
+    -fx-effect: dropshadow(three-pass-box, rgba(37,99,235,0.2), 4, 0, 0, 0);
+}
+
+/* Botones de Acción */
+.btn {
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 16px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-alignment: center;
+}
+
+.btn-guardar {
+    -fx-background-color: #059669;
+    -fx-text-fill: #ffffff;
+}
+.btn-guardar:hover {
+    -fx-background-color: #047857;
+}
+
+.btn-actualizar {
+    -fx-background-color: #d97706;
+    -fx-text-fill: #ffffff;
+}
+.btn-actualizar:hover {
+    -fx-background-color: #b45309;
+}
+
+.btn-eliminar {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: #ffffff;
+}
+.btn-eliminar:hover {
+    -fx-background-color: #b91c1c;
+}
+
+.btn-limpiar {
+    -fx-background-color: #64748b;
+    -fx-text-fill: #ffffff;
+}
+.btn-limpiar:hover {
+    -fx-background-color: #475569;
+}
+
+.btn-reporte {
+    -fx-background-color: #0284c7;
+    -fx-text-fill: #ffffff;
+}
+.btn-reporte:hover {
+    -fx-background-color: #0369a1;
+}
+
+/* TableView */
+.table-view {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 8px;
+    -fx-border-color: #e2e8f0;
+    -fx-border-radius: 8px;
+    -fx-padding: 0;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #f1f5f9;
+    -fx-background-radius: 8px 8px 0 0;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 0 0 1 0;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-text-fill: #1e293b;
+    -fx-padding: 8px;
+}
+
+.table-view .table-row-cell {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #f1f5f9;
+    -fx-border-width: 0 0 1 0;
+    -fx-cell-size: 34px;
+}
+
+.table-view .table-row-cell:odd {
+    -fx-background-color: #f8fafc;
+}
+
+.table-view .table-row-cell:hover {
+    -fx-background-color: #e0f2fe;
+    -fx-cursor: hand;
+}
+
+.table-view .table-row-cell:selected {
+    -fx-background-color: #bfdbfe;
+    -fx-text-fill: #1e3a8a;
+}
+
+/* Barra de Estado Inferior */
+.status-bar {
+    -fx-background-color: #e2e8f0;
+    -fx-padding: 6px 18px;
+    -fx-border-color: #cbd5e1;
+    -fx-border-width: 1 0 0 0;
+}
+
+.status-label {
+    -fx-font-size: 11px;
+    -fx-text-fill: #475569;
+}

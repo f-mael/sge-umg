@@ -13,4 +13,6 @@ public interface Repository<T> {
     Optional<T> findById(int id);
 
     List<T> findAll();
+
+    List<T> search(String criterio);
 }

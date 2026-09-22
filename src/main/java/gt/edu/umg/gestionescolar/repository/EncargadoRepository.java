@@ -116,6 +116,34 @@ public class EncargadoRepository implements Repository<Encargado> {
         return lista;
     }
 
+    @Override
+    public List<Encargado> search(String criterio) {
+        if (criterio == null || criterio.isBlank()) {
+            return findAll();
+        }
+        List<Encargado> lista = new ArrayList<>();
+        String sql = """
+            SELECT * FROM encargados 
+            WHERE nombre LIKE ? OR apellido LIKE ? OR cui LIKE ? OR parentesco LIKE ? OR direccion LIKE ? OR email LIKE ? OR telefono LIKE ?
+            ORDER BY apellido, nombre
+        """;
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String pattern = "%" + criterio.trim() + "%";
+            for (int i = 1; i <= 7; i++) {
+                stmt.setString(i, pattern);
+            }
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapResultSetToEncargado(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al buscar encargados: " + e.getMessage());
+        }
+        return lista;
+    }
+
     private Encargado mapResultSetToEncargado(ResultSet rs) throws SQLException {
         return new Encargado(
             rs.getInt("id"),
