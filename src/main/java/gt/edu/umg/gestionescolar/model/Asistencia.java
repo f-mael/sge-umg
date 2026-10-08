@@ -12,13 +12,13 @@ public class Asistencia {
     public Asistencia() {
     }
 
-    public Asistencia(int idAsistencia, Estudiante estudiante, Curso curso,
-            LocalDate fecha, String estado) {
+    public Asistencia(int idAsistencia, Estudiante estudiante,
+                      Curso curso, LocalDate fecha, String estado) {
         this.idAsistencia = idAsistencia;
         this.estudiante = estudiante;
         this.curso = curso;
         this.fecha = fecha;
-        this.estado = estado;
+        setEstado(estado);
     }
 
     public int getIdAsistencia() {
@@ -58,6 +58,22 @@ public class Asistencia {
     }
 
     public void setEstado(String estado) {
-        this.estado = estado;
+        if (estado == null) {
+            throw new IllegalArgumentException(
+                "Debe seleccionar Presente o Ausente."
+            );
+        }
+
+        String valor = estado.trim();
+
+        if (valor.equalsIgnoreCase("Presente")) {
+            this.estado = "Presente";
+        } else if (valor.equalsIgnoreCase("Ausente")) {
+            this.estado = "Ausente";
+        } else {
+            throw new IllegalArgumentException(
+                "El estado debe ser Presente o Ausente."
+            );
+        }
     }
 }

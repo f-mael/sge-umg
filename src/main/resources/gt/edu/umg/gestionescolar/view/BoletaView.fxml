@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="gt.edu.umg.gestionescolar.controller.BoletaController"
+      spacing="12"
+      prefWidth="1100"
+      prefHeight="700"
+      style="-fx-background-color: #f4f7fb;">
+
+    <padding>
+        <Insets top="16" right="20" bottom="16" left="20"/>
+    </padding>
+
+    <Label text="Boletas de calificaciones"
+           style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #173567;"/>
+
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+        <content>
+            <VBox spacing="14">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+
+                <Label fx:id="lblId" text="Nueva boleta"
+                       style="-fx-font-weight: bold;"/>
+
+                <FlowPane hgap="16" vgap="12">
+                    <VBox spacing="5">
+                        <Label text="Estudiante"/>
+                        <ComboBox fx:id="cbEstudiante"
+                                  promptText="Seleccionar estudiante"
+                                  prefWidth="280"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Ciclo escolar"/>
+                        <ComboBox fx:id="cbCiclo"
+                                  promptText="Seleccionar ciclo"
+                                  prefWidth="180"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Período"/>
+                        <TextField fx:id="txtPeriodo"
+                                   promptText="Ejemplo: Primer bimestre"
+                                   prefWidth="200"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Fecha de emisión"/>
+                        <DatePicker fx:id="dpFecha"
+                                    editable="false"
+                                    prefWidth="160"/>
+                    </VBox>
+                </FlowPane>
+
+                <Separator/>
+
+                <Label text="Cursos y notas"
+                       style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+
+                <FlowPane hgap="12" vgap="10">
+                    <VBox spacing="5">
+                        <Label text="Curso"/>
+                        <ComboBox fx:id="cbCurso"
+                                  promptText="Seleccionar curso"
+                                  prefWidth="260"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Nota (0 a 100)"/>
+                        <TextField fx:id="txtNota"
+                                   promptText="Ejemplo: 85"
+                                   prefWidth="120"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Peso"/>
+                        <TextField fx:id="txtPeso"
+                                   text="1"
+                                   promptText="Ejemplo: 1"
+                                   prefWidth="100"/>
+                    </VBox>
+
+                    <VBox spacing="5">
+                        <Label text="Observación"/>
+                        <TextField fx:id="txtObservacion"
+                                   promptText="Opcional"
+                                   prefWidth="240"/>
+                    </VBox>
+                </FlowPane>
+
+                <Label text="El peso indica cuánto cuenta cada curso. Si todos tienen peso 1, cuentan por igual."
+                       wrapText="true"
+                       style="-fx-text-fill: #526175;"/>
+
+                <FlowPane hgap="10" vgap="10">
+                    <Button text="Agregar curso"
+                            onAction="#agregarDetalle"/>
+                    <Button text="Actualizar curso"
+                            onAction="#actualizarDetalle"/>
+                    <Button text="Quitar curso"
+                            onAction="#eliminarDetalle"/>
+                    <Button text="Limpiar curso"
+                            onAction="#limpiarDetalle"/>
+                </FlowPane>
+
+                <TableView fx:id="tblDetalles"
+                           prefHeight="190"
+                           minHeight="150">
+                    <columns>
+                        <TableColumn fx:id="colDetalleCurso"
+                                     text="Curso"
+                                     prefWidth="280"/>
+                        <TableColumn fx:id="colDetalleNota"
+                                     text="Nota"
+                                     prefWidth="100"/>
+                        <TableColumn fx:id="colDetallePeso"
+                                     text="Peso"
+                                     prefWidth="100"/>
+                        <TableColumn fx:id="colDetalleObservacion"
+                                     text="Observación"
+                                     prefWidth="350"/>
+                    </columns>
+                </TableView>
+
+                <Label fx:id="lblPromedio"
+                       text="Promedio ponderado: 0.00"
+                       style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #173567;"/>
+
+                <FlowPane hgap="10" vgap="10">
+                    <Button text="Guardar boleta"
+                            onAction="#guardar"/>
+                    <Button text="Actualizar boleta"
+                            onAction="#actualizar"/>
+                    <Button text="Eliminar boleta"
+                            onAction="#eliminar"/>
+                    <Button text="Nueva / Limpiar"
+                            onAction="#limpiar"/>
+                    <Button text="Actualizar listas"
+                            onAction="#actualizarListas"/>
+                </FlowPane>
+
+                <Separator/>
+
+                <Label text="Boletas guardadas"
+                       style="-fx-font-size: 17px; -fx-font-weight: bold;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Label text="Buscar:"/>
+                    <TextField fx:id="txtBuscar"
+                               promptText="Estudiante, carné, ciclo, período o curso"
+                               HBox.hgrow="ALWAYS"/>
+                    <Button text="Limpiar búsqueda"
+                            onAction="#limpiarBusqueda"/>
+                </HBox>
+
+                <TableView fx:id="tblBoletas"
+                           prefHeight="220"
+                           minHeight="150">
+                    <columns>
+                        <TableColumn fx:id="colBoletaId"
+                                     text="ID"
+                                     prefWidth="55"/>
+                        <TableColumn fx:id="colBoletaEstudiante"
+                                     text="Estudiante"
+                                     prefWidth="250"/>
+                        <TableColumn fx:id="colBoletaCiclo"
+                                     text="Ciclo"
+                                     prefWidth="80"/>
+                        <TableColumn fx:id="colBoletaPeriodo"
+                                     text="Período"
+                                     prefWidth="180"/>
+                        <TableColumn fx:id="colBoletaFecha"
+                                     text="Emisión"
+                                     prefWidth="110"/>
+                        <TableColumn fx:id="colBoletaPromedio"
+                                     text="Promedio"
+                                     prefWidth="100"/>
+                    </columns>
+                </TableView>
+
+                <Label fx:id="lblTotal" text="Total: 0 boletas"/>
+            </VBox>
+        </content>
+    </ScrollPane>
+</VBox>
