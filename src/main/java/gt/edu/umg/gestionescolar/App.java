@@ -1,5 +1,9 @@
 package gt.edu.umg.gestionescolar;
 
+import gt.edu.umg.gestionescolar.controller.AsistenciaController;
+import gt.edu.umg.gestionescolar.controller.BoletaController;
+import gt.edu.umg.gestionescolar.util.DatosPruebaAcademicos;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,29 +22,24 @@ public class App extends Application {
     public void start(Stage stage) {
         try {
             Tab personas = cargarPestana(
-                "Personas", "PersonasView.fxml"
-            );
+                    "Personas", "PersonasView.fxml");
 
             Tab asistencia = cargarPestana(
-                "Asistencia", "AsistenciaView.fxml"
-            );
+                    "Asistencia", "AsistenciaView.fxml");
 
             Tab boletas = cargarPestana(
-                "Boletas", "BoletaView.fxml"
-            );
+                    "Boletas", "BoletaView.fxml");
 
-            TabPane pestanas = new TabPane();
-            pestanas.getTabs().addAll(
-                personas, asistencia, boletas
-            );
+            TabPane pestanas = new TabPane(
+                    personas, asistencia, boletas);
 
             pestanas.setTabClosingPolicy(
-                TabPane.TabClosingPolicy.UNAVAILABLE
-            );
+                    TabPane.TabClosingPolicy.UNAVAILABLE);
 
             Scene scene = new Scene(pestanas, 1200, 800);
 
-            stage.setTitle("Sistema de Gestión Escolar - SGE");
+            stage.setTitle(
+                    "Sistema de Gestión Escolar - SGE (datos académicos de prueba)");
             stage.setMinWidth(1000);
             stage.setMinHeight(700);
             stage.setScene(scene);
@@ -52,12 +51,9 @@ public class App extends Application {
             Alert alerta = new Alert(Alert.AlertType.ERROR);
             alerta.setTitle("Error al iniciar");
             alerta.setHeaderText(
-                "No se pudo abrir el Sistema de Gestión Escolar."
-            );
+                    "No se pudo abrir el Sistema de Gestión Escolar");
             alerta.setContentText(
-                "Revise el error en la terminal.\n"
-                + e.getMessage()
-            );
+                    "Revise el error en la terminal.\n" + e.getMessage());
             alerta.showAndWait();
         }
     }
@@ -66,23 +62,32 @@ public class App extends Application {
             throws IOException {
 
         URL ubicacion = getClass().getResource(
-            "/gt/edu/umg/gestionescolar/view/" + archivo
-        );
+                "/gt/edu/umg/gestionescolar/view/" + archivo);
 
         if (ubicacion == null) {
             ubicacion = getClass().getResource(
-                "/gt/edu/umg/gestionescolar/views/" + archivo
-            );
+                    "/gt/edu/umg/gestionescolar/views/" + archivo);
         }
 
         if (ubicacion == null) {
             throw new IOException(
-                "No se encontró el archivo " + archivo
-            );
+                    "No se encontró el archivo " + archivo);
         }
 
         FXMLLoader loader = new FXMLLoader(ubicacion);
         Parent contenido = loader.load();
+
+        Object controlador = loader.getController();
+
+        // Conexión temporal para probar el módulo.
+        if (controlador instanceof AsistenciaController asistencia) {
+            asistencia.setCursos(DatosPruebaAcademicos.getCursos());
+        }
+
+        if (controlador instanceof BoletaController boletas) {
+            boletas.setCursos(DatosPruebaAcademicos.getCursos());
+            boletas.setCiclos(DatosPruebaAcademicos.getCiclos());
+        }
 
         return new Tab(titulo, contenido);
     }
