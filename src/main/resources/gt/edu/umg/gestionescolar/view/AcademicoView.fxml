@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="700.0" prefWidth="1160.0" stylesheets="@../styles/personas.css" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="gt.edu.umg.gestionescolar.controller.AcademicoController">
+   <top>
+      <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="header-bar" BorderPane.alignment="CENTER">
+         <children>
+            <VBox spacing="2.0">
+               <children>
+                  <Label styleClass="header-title" text="🎓 Módulo Académico y Matrícula" />
+                  <Label styleClass="header-subtitle" text="Universidad Mariano Gálvez de Guatemala • Gestión de Cursos e Inscripciones" />
+               </children>
+            </VBox>
+         </children>
+      </HBox>
+   </top>
+   <center>
+      <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <tabs>
+          <!-- PESTAÑA 1: MATRICULACIÓN / INSCRIPCIONES -->
+          <Tab text="📝 Matrícula / Inscripciones">
+            <content>
+              <VBox spacing="12.0">
+                 <padding>
+                    <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+                 </padding>
+                 <children>
+                    <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="search-bar">
+                       <children>
+                          <Label style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" text="🔍 Buscar:" />
+                          <TextField fx:id="txtInscripcionBuscar" prefWidth="380.0" promptText="Buscar por estudiante, carné o grado..." styleClass="search-field" />
+                          <Pane HBox.hgrow="ALWAYS" />
+                          <Label fx:id="lblInscripcionContador" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" text="Total: 0 inscripciones" />
+                       </children>
+                    </HBox>
+                    <HBox spacing="14.0" VBox.vgrow="ALWAYS">
+                       <children>
+                          <!-- Formulario Inscripción -->
+                          <VBox prefWidth="380.0" spacing="10.0" styleClass="card-panel">
+                             <children>
+                                <Label styleClass="card-title" text="Formulario de Inscripción" />
+                                <Label fx:id="lblCicloActivoInfo" style="-fx-text-fill: #0284c7; -fx-font-weight: bold;" text="Ciclo Activo: ..." />
+                                <TextField fx:id="txtInscripcionId" managed="false" visible="false" />
+                                <GridPane hgap="8.0" vgap="12.0">
+                                   <children>
+                                      <Label styleClass="form-label" text="Estudiante: *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                      <ComboBox fx:id="cbInscripcionEstudiante" maxWidth="Infinity" promptText="-- Seleccionar Estudiante --" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                      <Label styleClass="form-label" text="Grado Asignado: *" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                      <ComboBox fx:id="cbInscripcionGrado" maxWidth="Infinity" promptText="-- Seleccionar Grado --" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                   </children>
+                                </GridPane>
+                                <Pane VBox.vgrow="ALWAYS" />
+                                <VBox spacing="8.0">
+                                   <children>
+                                      <Button maxWidth="Infinity" onAction="#handleGuardarInscripcion" styleClass="btn, btn-guardar" text="💾 Matricular Estudiante" />
+                                      <HBox spacing="8.0">
+                                         <children>
+                                            <Button maxWidth="Infinity" onAction="#handleEliminarInscripcion" styleClass="btn, btn-eliminar" text="🗑️ Dar de Baja" HBox.hgrow="ALWAYS" />
+                                            <Button maxWidth="Infinity" onAction="#handleLimpiarInscripcion" styleClass="btn, btn-limpiar" text="🧹 Limpiar" HBox.hgrow="ALWAYS" />
+                                         </children>
+                                      </HBox>
+                                   </children>
+                                </VBox>
+                             </children>
+                          </VBox>
+                          <!-- Tabla Inscripciones -->
+                          <VBox spacing="10.0" styleClass="card-panel" HBox.hgrow="ALWAYS">
+                             <children>
+                                <Label styleClass="card-title" text="Estudiantes Inscritos en el Ciclo" />
+                                <TableView fx:id="tblInscripciones" VBox.vgrow="ALWAYS">
+                                  <columns>
+                                    <TableColumn fx:id="colInsId" prefWidth="45.0" text="ID" />
+                                    <TableColumn fx:id="colInsFecha" prefWidth="100.0" text="Fecha" />
+                                    <TableColumn fx:id="colInsEstudiante" prefWidth="250.0" text="Estudiante" />
+                                    <TableColumn fx:id="colInsGrado" prefWidth="160.0" text="Grado / Sección" />
+                                    <TableColumn fx:id="colInsCiclo" prefWidth="80.0" text="Ciclo" />
+                                  </columns>
+                                  <columnResizePolicy>
+                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                  </columnResizePolicy>
+                                </TableView>
+                             </children>
+                          </VBox>
+                       </children>
+                    </HBox>
+                 </children>
+              </VBox>
+            </content>
+          </Tab>
+
+          <!-- PESTAÑA 2: CURSOS -->
+          <Tab text="📚 Cursos">
+            <content>
+              <VBox spacing="12.0">
+                 <padding>
+                    <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+                 </padding>
+                 <children>
+                    <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="search-bar">
+                       <children>
+                          <Label style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" text="🔍 Buscar:" />
+                          <TextField fx:id="txtCursoBuscar" prefWidth="380.0" promptText="Buscar por nombre, docente o grado..." styleClass="search-field" />
+                          <Pane HBox.hgrow="ALWAYS" />
+                          <Label fx:id="lblCursoContador" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" text="Total: 0 cursos" />
+                       </children>
+                    </HBox>
+                    <HBox spacing="14.0" VBox.vgrow="ALWAYS">
+                       <children>
+                          <!-- Formulario Cursos -->
+                          <VBox prefWidth="380.0" spacing="10.0" styleClass="card-panel">
+                             <children>
+                                <Label styleClass="card-title" text="Datos del Curso" />
+                                <TextField fx:id="txtCursoId" managed="false" visible="false" />
+                                <GridPane hgap="8.0" vgap="12.0">
+                                   <children>
+                                      <Label styleClass="form-label" text="Nombre Curso: *" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                      <TextField fx:id="txtCursoNombre" promptText="ej. Programación II" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                                      <Label styleClass="form-label" text="Docente: *" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                      <ComboBox fx:id="cbCursoDocente" maxWidth="Infinity" promptText="-- Asignar Docente --" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                      <Label styleClass="form-label" text="Grado / Sección: *" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                                      <ComboBox fx:id="cbCursoGrado" maxWidth="Infinity" promptText="-- Asignar Grado --" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                                   </children>
+                                </GridPane>
+                                <Pane VBox.vgrow="ALWAYS" />
+                                <VBox spacing="8.0">
+                                   <children>
+                                      <Button maxWidth="Infinity" onAction="#handleGuardarCurso" styleClass="btn, btn-guardar" text="💾 Guardar Curso" />
+                                      <HBox spacing="8.0">
+                                         <children>
+                                            <Button maxWidth="Infinity" onAction="#handleEliminarCurso" styleClass="btn, btn-eliminar" text="🗑️ Eliminar" HBox.hgrow="ALWAYS" />
+                                            <Button maxWidth="Infinity" onAction="#handleLimpiarCurso" styleClass="btn, btn-limpiar" text="🧹 Limpiar" HBox.hgrow="ALWAYS" />
+                                         </children>
+                                      </HBox>
+                                   </children>
+                                </VBox>
+                             </children>
+                          </VBox>
+                          <!-- Tabla Cursos -->
+                          <VBox spacing="10.0" styleClass="card-panel" HBox.hgrow="ALWAYS">
+                             <children>
+                                <Label styleClass="card-title" text="Catálogo de Cursos" />
+                                <TableView fx:id="tblCursos" VBox.vgrow="ALWAYS">
+                                  <columns>
+                                    <TableColumn fx:id="colCursoId" prefWidth="45.0" text="ID" />
+                                    <TableColumn fx:id="colCursoNombre" prefWidth="200.0" text="Nombre del Curso" />
+                                    <TableColumn fx:id="colCursoDocente" prefWidth="200.0" text="Docente Asignado" />
+                                    <TableColumn fx:id="colCursoGrado" prefWidth="160.0" text="Grado / Sección" />
+                                  </columns>
+                                  <columnResizePolicy>
+                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                  </columnResizePolicy>
+                                </TableView>
+                             </children>
+                          </VBox>
+                       </children>
+                    </HBox>
+                 </children>
+              </VBox>
+            </content>
+          </Tab>
+
+          <!-- PESTAÑA 3: GRADOS Y SECCIONES -->
+          <Tab text="🏫 Grados y Secciones">
+            <content>
+              <VBox spacing="12.0">
+                 <padding>
+                    <Insets bottom="14.0" left="16.0" right="16.0" top="14.0" />
+                 </padding>
+                 <children>
+                    <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="search-bar">
+                       <children>
+                          <Label style="-fx-font-weight: bold; -fx-text-fill: #1e293b;" text="🔍 Buscar:" />
+                          <TextField fx:id="txtGradoBuscar" prefWidth="380.0" promptText="Buscar por nombre, nivel o sección..." styleClass="search-field" />
+                          <Pane HBox.hgrow="ALWAYS" />
+                          <Label fx:id="lblGradoContador" style="-fx-text-fill: #64748b; -fx-font-weight: bold;" text="Total: 0 grados" />
+                       </children>
+                    </HBox>
+                    <TableView fx:id="tblGrados" VBox.vgrow="ALWAYS">
+                      <columns>
+                        <TableColumn fx:id="colGradoId" prefWidth="60.0" text="ID" />
+                        <TableColumn fx:id="colGradoNombre" prefWidth="250.0" text="Nombre del Grado" />
+                        <TableColumn fx:id="colGradoNivel" prefWidth="180.0" text="Nivel Académico" />
+                        <TableColumn fx:id="colGradoSeccion" prefWidth="100.0" text="Sección" />
+                      </columns>
+                      <columnResizePolicy>
+                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                      </columnResizePolicy>
+                    </TableView>
+                 </children>
+              </VBox>
+            </content>
+          </Tab>
+        </tabs>
+      </TabPane>
+   </center>
+</BorderPane>
