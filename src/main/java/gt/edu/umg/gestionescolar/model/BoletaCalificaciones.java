@@ -106,18 +106,20 @@ public class BoletaCalificaciones {
     }
 
     public double calcularPromedio() {
-        if (detalles.isEmpty()) {
-            promedio = 0.0;
-            return promedio;
-        }
-
-        double sumaNotas = 0.0;
-
-        for (DetalleBoleta detalle : detalles) {
-            sumaNotas += detalle.getNota();
-        }
-
-        promedio = sumaNotas / detalles.size();
+    if (detalles.isEmpty()) {
+        promedio = 0.0;
         return promedio;
     }
+
+    double sumaNotasPonderadas = 0.0;
+    double sumaPesos = 0.0;
+
+    for (DetalleBoleta detalle : detalles) {
+        sumaNotasPonderadas += detalle.getNota() * detalle.getPeso();
+        sumaPesos += detalle.getPeso();
+    }
+
+    promedio = sumaNotasPonderadas / sumaPesos;
+    return promedio;
+}
 }

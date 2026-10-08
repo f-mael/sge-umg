@@ -1,5 +1,9 @@
 package gt.edu.umg.gestionescolar;
 
+import gt.edu.umg.gestionescolar.controller.AsistenciaController;
+import gt.edu.umg.gestionescolar.controller.BoletaController;
+import gt.edu.umg.gestionescolar.util.DatosPruebaAcademicos;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -9,18 +13,16 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
-/**
- * Aplicación principal del Sistema de Gestión Escolar (UMG).
- * Integra el Módulo de Personas y el Módulo Académico en una sola interfaz.
- */
 public class App extends Application {
 
     @Override
     public void start(Stage stage) {
         try {
-            // 1. Cargar la vista principal (Módulo de Personas)
+            // 1. Cargar vista principal (Personas)
             URL fxmlPersonas = getClass().getResource("/gt/edu/umg/gestionescolar/view/PersonasView.fxml");
             if (fxmlPersonas == null) {
                 fxmlPersonas = getClass().getResource("/gt/edu/umg/gestionescolar/views/PersonasView.fxml");
@@ -32,7 +34,7 @@ public class App extends Application {
             FXMLLoader loaderPersonas = new FXMLLoader(fxmlPersonas);
             Parent rootPersonas = loaderPersonas.load();
 
-            // 2. Cargar tu vista (Módulo Académico)
+            // 2. Cargar vista del Módulo Académico e integrar sus pestañas
             URL fxmlAcademico = getClass().getResource("/gt/edu/umg/gestionescolar/view/AcademicoView.fxml");
             if (fxmlAcademico == null) {
                 fxmlAcademico = getClass().getResource("/gt/edu/umg/gestionescolar/views/AcademicoView.fxml");
@@ -42,28 +44,23 @@ public class App extends Application {
                 FXMLLoader loaderAcademico = new FXMLLoader(fxmlAcademico);
                 Parent rootAcademico = loaderAcademico.load();
 
-                // Extraer el TabPane de PersonasView y el de AcademicoView
                 TabPane tabPanePersonas = (TabPane) ((BorderPane) rootPersonas).getCenter();
                 TabPane tabPaneAcademico = (TabPane) ((BorderPane) rootAcademico).getCenter();
 
-                // Transferir todas las pestañas de tu módulo al TabPane principal
-                // (Usamos new java.util.ArrayList para evitar conflictos al mover los tabs)
-                for (Tab tab : new java.util.ArrayList<>(tabPaneAcademico.getTabs())) {
+                for (Tab tab : new ArrayList<>(tabPaneAcademico.getTabs())) {
                     tabPanePersonas.getTabs().add(tab);
                 }
             }
 
-            // 3. Crear la escena con la ventana integrada
             Scene scene = new Scene(rootPersonas, 1200, 720);
-
-            stage.setTitle("Sistema de Gestión Escolar - SGE (UMG Cobán)");
+            stage.setTitle("Sistema de Gestión Escolar - SGE");
             stage.setMinWidth(1000);
             stage.setMinHeight(650);
             stage.setScene(scene);
             stage.show();
 
         } catch (Exception e) {
-            System.err.println("Error al iniciar la aplicación integrada: " + e.getMessage());
+            System.err.println("Error al iniciar la aplicación: " + e.getMessage());
             e.printStackTrace();
         }
     }
