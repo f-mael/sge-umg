@@ -1,20 +1,33 @@
 package gt.edu.umg.gestionescolar.repository;
 
 public final class DatosCompartidos {
+
     private static final EstudianteRepository ESTUDIANTES =
-        new EstudianteRepository();
+            new EstudianteRepository();
 
     private static final DocenteRepository DOCENTES =
-        new DocenteRepository();
+            new DocenteRepository();
 
     private static final EncargadoRepository ENCARGADOS =
-        new EncargadoRepository();
+            new EncargadoRepository();
+
+    private static final GradoSeccionRepository GRADOS =
+            new GradoSeccionRepository();
+
+    private static final CursoRepository CURSOS =
+            new CursoRepository();
+
+    private static final CicloEscolarRepository CICLOS =
+            new CicloEscolarRepository();
+
+    private static final InscripcionRepository INSCRIPCIONES =
+            new InscripcionRepository();
 
     private static final AsistenciaRepository ASISTENCIAS =
-        new AsistenciaRepository();
+            new AsistenciaRepository();
 
     private static final BoletaRepository BOLETAS =
-        new BoletaRepository();
+            new BoletaRepository();
 
     private DatosCompartidos() {
     }
@@ -29,6 +42,22 @@ public final class DatosCompartidos {
 
     public static EncargadoRepository getEncargados() {
         return ENCARGADOS;
+    }
+
+    public static GradoSeccionRepository getGrados() {
+        return GRADOS;
+    }
+
+    public static CursoRepository getCursos() {
+        return CURSOS;
+    }
+
+    public static CicloEscolarRepository getCiclos() {
+        return CICLOS;
+    }
+
+    public static InscripcionRepository getInscripciones() {
+        return INSCRIPCIONES;
     }
 
     public static AsistenciaRepository getAsistencias() {
