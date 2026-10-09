@@ -3,10 +3,8 @@ package gt.edu.umg.gestionescolar.controller;
 import gt.edu.umg.gestionescolar.model.Docente;
 import gt.edu.umg.gestionescolar.model.Encargado;
 import gt.edu.umg.gestionescolar.model.Estudiante;
-import gt.edu.umg.gestionescolar.repository.DocenteRepository;
-import gt.edu.umg.gestionescolar.repository.EncargadoRepository;
-import gt.edu.umg.gestionescolar.repository.EstudianteRepository;
 import gt.edu.umg.gestionescolar.repository.Repository;
+import gt.edu.umg.gestionescolar.repository.DatosCompartidos;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -32,9 +30,9 @@ import java.util.regex.Pattern;
 public class PersonasController implements Initializable {
 
     // Repositorios basados en listas en memoria
-    private final Repository<Estudiante> estudianteRepo = new EstudianteRepository();
-    private final Repository<Docente> docenteRepo = new DocenteRepository();
-    private final Repository<Encargado> encargadoRepo = new EncargadoRepository();
+    private final Repository<Estudiante> estudianteRepo = DatosCompartidos.getEstudiantes();
+    private final Repository<Docente> docenteRepo = DatosCompartidos.getDocentes();
+    private final Repository<Encargado> encargadoRepo = DatosCompartidos.getEncargados();
 
     // ==========================================
     // CONTROLES DE INTERFAZ
