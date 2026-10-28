@@ -3,6 +3,7 @@ package gt.edu.umg.gestionescolar;
 import gt.edu.umg.gestionescolar.controller.AsistenciaController;
 import gt.edu.umg.gestionescolar.controller.BoletaController;
 import gt.edu.umg.gestionescolar.repository.DatosCompartidos;
+import gt.edu.umg.gestionescolar.util.DatabaseManager;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -24,6 +25,8 @@ public class App extends Application {
     @Override
     public void start(Stage stage) {
         try {
+            DatabaseManager.initializeDatabase();
+
             // Cargar el módulo de Personas.
             FXMLLoader loaderPersonas = crearLoader("PersonasView.fxml");
             Parent rootPersonas = loaderPersonas.load();
@@ -133,12 +136,6 @@ public class App extends Application {
         URL ubicacion = getClass().getResource(
                 "/gt/edu/umg/gestionescolar/view/" + archivo
         );
-
-        if (ubicacion == null) {
-            ubicacion = getClass().getResource(
-                    "/gt/edu/umg/gestionescolar/views/" + archivo
-            );
-        }
 
         if (ubicacion == null) {
             throw new IOException("No se encontró el archivo " + archivo);
