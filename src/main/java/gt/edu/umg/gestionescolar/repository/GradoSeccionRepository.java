@@ -3,84 +3,134 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package gt.edu.umg.gestionescolar.repository;
-import java.util.ArrayList; 
-import java.util.List; 
-import java.util.Optional;
+
 import gt.edu.umg.gestionescolar.model.GradoSeccion;
-/**
- *
- * @author HP
- */
-public class GradoSeccionRepository implements Repository <GradoSeccion>{
-    
-    //variable Array llamada grados
-    private List<GradoSeccion> grados;
-    
-    public GradoSeccionRepository(){
-        //inicia la lista en la RAM 
-    this.grados = new ArrayList<>();
-    
-    save(new GradoSeccion(1, "Primero Basico", "Basico", 'A'));
-    save(new GradoSeccion(2, "Segundo Basico", "Basico", 'A'));
-    save(new GradoSeccion(3, "Tercero Basico", "Basico", 'B'));
-}
-    //1. guardar usando .add()
-    //Override avisa al compilador cumple con una de las 6 firmas obligatorias en Repository.java 
+import gt.edu.umg.gestionescolar.util.DatabaseManager;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class GradoSeccionRepository implements Repository<GradoSeccion> {
+
     @Override
-    public void save(GradoSeccion entity){
-        grados.add(entity); // entity es una variable de entrada definida en Repository.java
-    }//.add inserta un elemento al final de la lista
-    
-    //2. modificar 
+    public void save(GradoSeccion gs) {
+        String sql = "INSERT INTO grados_secciones (nombre, nivel, seccion) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, gs.getNombre());
+            ps.setString(2, gs.getNivel());
+            ps.setString(3, String.valueOf(gs.getSeccion()));
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    gs.setIdGradoSeccion(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al guardar GradoSeccion: " + e.getMessage());
+        }
+    }
+
     @Override
-    public void update(GradoSeccion entity){
-        for(int i=0; i<grados.size(); i++){
-            if(grados.get(i).getIdGradoSeccion() == entity.getIdGradoSeccion()){
-                grados.set(i, entity); //aqui se reemplaza el objeto en la posicion "i"
-            }
+    public void update(GradoSeccion gs) {
+        String sql = "UPDATE grados_secciones SET nombre = ?, nivel = ?, seccion = ? WHERE id_grado_seccion = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, gs.getNombre());
+            ps.setString(2, gs.getNivel());
+            ps.setString(3, String.valueOf(gs.getSeccion()));
+            ps.setInt(4, gs.getIdGradoSeccion());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar GradoSeccion: " + e.getMessage());
         }
     }
-    
-    // 3.Eliminar
-    @Override 
-    public void delete(int id){
-        grados.removeIf(grado -> grado.getIdGradoSeccion() == id);
-    }
-    
-    //4. Buscar por ID 
-    @Override 
-    public Optional<GradoSeccion> findById(int id){
-        for(GradoSeccion g : grados){
-            if(g.getIdGradoSeccion()==id){
-                return Optional.of(g); //se busca dentro del contenedor Optional
-            }
+
+    @Override
+    public void delete(int id) {
+        String sql = "DELETE FROM grados_secciones WHERE id_grado_seccion = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar GradoSeccion: " + e.getMessage());
         }
-        return Optional.empty(); // no encontrado
     }
-    
-    //5. Listar 
-    @Override 
-    public List<GradoSeccion> findAll(){
-        return grados;
-    }
-    
-    //6. Buscar 
-    @Override 
-    public List<GradoSeccion> search(String criterio){
-        List<GradoSeccion> resultados = new ArrayList<>();
-        String filtro = criterio.toLowerCase().trim();
-        
-        //.tolowerCase convierte el texto a minuscula
-        //.contains devuelve true si el texto es similar o igual
-        for (GradoSeccion g: grados){
-            String sec= String.valueOf(g.getSeccion()).toLowerCase();
-            if(g.getNombre().toLowerCase().contains(filtro)||
-                g.getNivel().toLowerCase().contains(filtro)||
-                sec.contains(filtro) ){
-                resultados.add(g);
+
+    @Override
+    public Optional<GradoSeccion> findById(int id) {
+        String sql = "SELECT id_grado_seccion, nombre, nivel, seccion FROM grados_secciones WHERE id_grado_seccion = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
             }
-            
+        } catch (SQLException e) {
+            System.err.println("Error en findById GradoSeccion: " + e.getMessage());
         }
-        return resultados;
+        return Optional.empty();
+    }
+
+    @Override
+    public List<GradoSeccion> findAll() {
+        List<GradoSeccion> lista = new ArrayList<>();
+        String sql = "SELECT id_grado_seccion, nombre, nivel, seccion FROM grados_secciones ORDER BY id_grado_seccion";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findAll GradoSeccion: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    @Override
+    public List<GradoSeccion> search(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            return findAll();
+        }
+        List<GradoSeccion> lista = new ArrayList<>();
+        String sql = """
+            SELECT id_grado_seccion, nombre, nivel, seccion
+            FROM grados_secciones
+            WHERE LOWER(nombre) LIKE ? OR LOWER(nivel) LIKE ? OR LOWER(seccion) LIKE ?
+            ORDER BY id_grado_seccion
+        """;
+        String filtro = "%" + criterio.trim().toLowerCase() + "%";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, filtro);
+            ps.setString(2, filtro);
+            ps.setString(3, filtro);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en search GradoSeccion: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    private GradoSeccion mapear(ResultSet rs) throws SQLException {
+        String secStr = rs.getString("seccion");
+        char seccion = (secStr != null && !secStr.isEmpty()) ? secStr.charAt(0) : 'A';
+        return new GradoSeccion(
+            rs.getInt("id_grado_seccion"),
+            rs.getString("nombre"),
+            rs.getString("nivel"),
+            seccion
+        );
     }
 }

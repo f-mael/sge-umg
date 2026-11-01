@@ -53,11 +53,57 @@ public class DatabaseManager {
                         especialidad VARCHAR(100) NOT NULL
                     );
                 """;
+        
+        String sqlCicloEscolares = ("""
+                CREATE TABLE IF NOT EXISTS ciclos_escolares (
+                    id_ciclo SERIAL PRIMARY KEY,
+                    anio INT NOT NULL,
+                    fecha_inicio DATE NOT NULL,
+                    fecha_fin DATE NOT NULL,
+                    activo BOOLEAN NOT NULL DEFAULT TRUE
+                );
+            """);
+        
+        String sqlGradosSecciones = ("""
+                CREATE TABLE IF NOT EXISTS grados_secciones (
+                    id_grado_seccion SERIAL PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL,
+                    nivel VARCHAR(50) NOT NULL,
+                    seccion CHAR(1) NOT NULL
+                );
+            """);
+
+            String sqlCursos = ("""
+                CREATE TABLE IF NOT EXISTS cursos (
+                    id_curso SERIAL PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL,
+                    id_docente INT NOT NULL,
+                    id_grado_seccion INT NOT NULL REFERENCES grados_secciones(id_grado_seccion) ON DELETE CASCADE
+                );
+            """);
+
+            String sqlInscripciones = """
+                CREATE TABLE IF NOT EXISTS inscripciones (
+                    id_inscripcion SERIAL PRIMARY KEY,
+                    fecha_inscripcion DATE NOT NULL,
+                    id_estudiante INTEGER NOT NULL,
+                    id_grado_seccion INTEGER NOT NULL,
+                    id_ciclo INTEGER NOT NULL,
+                    CONSTRAINT fk_inscripciones_grado FOREIGN KEY (id_grado_seccion) REFERENCES grados_secciones(id_grado_seccion) ON DELETE CASCADE,
+                    CONSTRAINT fk_inscripciones_ciclo FOREIGN KEY (id_ciclo) REFERENCES ciclos_escolares(id_ciclo) ON DELETE CASCADE
+                );
+                """;
+
+           
 
         try (Connection conn = getConnection(); Statement stmt = conn.createStatement()) {
             stmt.execute(sqlEncargados);
             stmt.execute(sqlEstudiantes);
             stmt.execute(sqlDocentes);
+            stmt.execute(sqlCicloEscolares); 
+            stmt.execute(sqlGradosSecciones); 
+            stmt.execute(sqlCursos); 
+            stmt.execute(sqlInscripciones); 
         } catch (SQLException e) {
             System.err.println("Error al inicializar modulo personas: " + e.getMessage());
         }

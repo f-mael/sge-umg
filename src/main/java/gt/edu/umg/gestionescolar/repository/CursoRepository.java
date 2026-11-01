@@ -1,107 +1,123 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package gt.edu.umg.gestionescolar.repository;
 
 import gt.edu.umg.gestionescolar.model.Curso;
 import gt.edu.umg.gestionescolar.model.Docente;
 import gt.edu.umg.gestionescolar.model.GradoSeccion;
+import gt.edu.umg.gestionescolar.util.DatabaseManager;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-/**
- *
- * @author HP
- */
-public class CursoRepository implements Repository<Curso>{
-    
-    private List<Curso> cursos;
-    
-    public CursoRepository(){
-        this.cursos = new ArrayList<>();
-        
-        //instancia Docente 
-        Docente docente1 = new Docente(1, "Dania", "Pereira", "12345678", "danipereira@umg", "DOC-01", "Ciencias Exactas"); 
-        Docente docente2 = new Docente(1, "Bryan", "Caal", "11111111", "brycaal@umg", "DOC-02", "Lenguaje"); 
-        
-        //instanci GradoSeccion
-        GradoSeccion gradoSeccion1 = new GradoSeccion(1, "Primero Basico", "Basico", 'A');
-        GradoSeccion gradoSeccion2 = new GradoSeccion(2, "Segundo Basico", "Basico", 'B');
-        
-        //datos bases
-        save(new Curso(1, "Matematica", docente1, gradoSeccion1));
-        save(new Curso(2, "Idioma Español", docente2, gradoSeccion2)); 
-        save(new Curso(3, "Fisica", docente1, gradoSeccion2));
-    }
-    
-    //guardar
-    @Override 
-    public void save(Curso entity){
-        cursos.add(entity); 
-    }
-    
-    // actualizar
+import java.util.stream.Collectors;
+
+public class CursoRepository implements Repository<Curso> {
+
+    private final GradoSeccionRepository gradoRepo = new GradoSeccionRepository();
+    private final DocenteRepository docenteRepo = new DocenteRepository();
+
     @Override
-    public void update(Curso entity){ 
-        for(int i= 0; i<cursos.size(); i++){
-            if(cursos.get(i).getIdCurso()== entity.getIdCurso()){
-                cursos.set(i, entity); // aqui se reemplaza el curso en el indice i
-                return; 
+    public void save(Curso c) {
+        String sql = "INSERT INTO cursos (nombre, id_docente, id_grado_seccion) VALUES (?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, c.getNombre());
+            ps.setInt(2, c.getDocente() != null ? c.getDocente().getId() : 0);
+            ps.setInt(3, c.getGradoSeccion() != null ? c.getGradoSeccion().getIdGradoSeccion() : 0);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    c.setIdCurso(rs.getInt(1));
+                }
             }
+        } catch (SQLException e) {
+            System.err.println("Error al guardar Curso: " + e.getMessage());
         }
     }
-    
-    //Eliminar
-    @Override 
-    public void delete(int id){
-        cursos.removeIf(c -> c.getIdCurso() == id);
-    }
-    
-    // buscar
+
     @Override
-    public Optional<Curso> findById(int id){
-        for(Curso c : cursos){ 
-            if(c.getIdCurso() == id){
-                return Optional.of(c); 
-            }
+    public void update(Curso c) {
+        String sql = "UPDATE cursos SET nombre = ?, id_docente = ?, id_grado_seccion = ? WHERE id_curso = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, c.getNombre());
+            ps.setInt(2, c.getDocente() != null ? c.getDocente().getId() : 0);
+            ps.setInt(3, c.getGradoSeccion() != null ? c.getGradoSeccion().getIdGradoSeccion() : 0);
+            ps.setInt(4, c.getIdCurso());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar Curso: " + e.getMessage());
         }
-        return Optional.empty(); 
     }
-    
-    // listar
-    @Override 
-    public List<Curso> findAll(){
-        return cursos; 
-    }
-    
-    @Override 
-    public List<Curso> search(String criterio){
-        List<Curso> resultados = new ArrayList<>(); 
-        String filtro = criterio.toLowerCase().trim(); 
-        
-        for(Curso c: cursos){
-            //validacion para que el nombre no este vacio
-            boolean coincideNombre = c.getNombre() != null && 
-                                     c.getNombre().toLowerCase().contains(filtro); 
-            boolean coincideDocente = false; 
-            if(c.getDocente() != null){
-                String nombreCompleto= c.getDocente().getNombre() + "" + c.getDocente().getApellido();                 
-                coincideDocente = nombreCompleto.toLowerCase().contains(filtro); 
-                
-            }
-            
-            // validacion que tenga grado asignado 
-            boolean coincideGrado= false; 
-            if(c.getGradoSeccion() != null && c.getGradoSeccion().getNombre() != null){
-                coincideGrado = c.getGradoSeccion().getNombre().toLowerCase().toLowerCase().contains(filtro);  
-            }
-            
-            // si coincide con cualquiera de los 3 resultados se agrega al resultado
-            if(coincideNombre || coincideDocente || coincideGrado){
-                resultados.add(c); 
-            }
+
+    @Override
+    public void delete(int id) {
+        String sql = "DELETE FROM cursos WHERE id_curso = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar Curso: " + e.getMessage());
         }
-        return resultados; 
+    }
+
+    @Override
+    public Optional<Curso> findById(int id) {
+        String sql = "SELECT id_curso, nombre, id_docente, id_grado_seccion FROM cursos WHERE id_curso = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findById Curso: " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Curso> findAll() {
+        List<Curso> lista = new ArrayList<>();
+        String sql = "SELECT id_curso, nombre, id_docente, id_grado_seccion FROM cursos ORDER BY id_curso";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findAll Curso: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    @Override
+    public List<Curso> search(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            return findAll();
+        }
+        String f = criterio.trim().toLowerCase();
+        return findAll().stream()
+            .filter(c -> (c.getNombre() != null && c.getNombre().toLowerCase().contains(f))
+                || (c.getDocente() != null && c.getDocente().getNombreCompleto().toLowerCase().contains(f))
+                || (c.getGradoSeccion() != null && c.getGradoSeccion().toString().toLowerCase().contains(f)))
+            .collect(Collectors.toList());
+    }
+
+    private Curso mapear(ResultSet rs) throws SQLException {
+        int idCurso = rs.getInt("id_curso");
+        String nombre = rs.getString("nombre");
+        int idDocente = rs.getInt("id_docente");
+        int idGrado = rs.getInt("id_grado_seccion");
+
+        Docente docente = docenteRepo.findById(idDocente).orElse(null);
+        GradoSeccion grado = gradoRepo.findById(idGrado).orElse(null);
+
+        return new Curso(idCurso, nombre, docente, grado);
     }
 }

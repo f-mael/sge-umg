@@ -3,91 +3,142 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package gt.edu.umg.gestionescolar.repository;
+
 import gt.edu.umg.gestionescolar.model.CicloEscolar;
+import gt.edu.umg.gestionescolar.util.DatabaseManager;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional; 
-import java.time.LocalDate;
-import java.time.Month;
+import java.util.Optional;
 
-/**
- *
- * @author HP
- */
-public class CicloEscolarRepository implements Repository<CicloEscolar>{
-    
-   private List<CicloEscolar> cicloEscolar; 
-   
-   public CicloEscolarRepository(){
-       this.cicloEscolar = new ArrayList<>();
-       
-       //fechas 
-       LocalDate fecha_inicio = LocalDate.of(2026, Month.FEBRUARY, 1); 
-       LocalDate fecha_fin = LocalDate.of(2026, Month.OCTOBER, 15);
-       
-       //datos base
-       save(new CicloEscolar(1, 2026, fecha_inicio, fecha_fin, true)); 
-       save(new CicloEscolar(2, 2025, fecha_inicio, fecha_fin, false)); 
-   }   
-       //guardar
-       @Override
-      public void save(CicloEscolar entity){
-       cicloEscolar.add(entity); 
-   }
-      
-      //actualizar
-      @Override 
-      public void update(CicloEscolar entity){
-       for(int i= 0; i<cicloEscolar.size(); i++){
-            if(cicloEscolar.get(i).getIdCiclo()== entity.getIdCiclo()){
-                cicloEscolar.set(i, entity); // aqui se reemplaza el curso en el indice i
-                return; 
-            }
-        }  
-   }
-      
-      //Eliminar
-      @Override 
-        public void delete(int id){
-        cicloEscolar.removeIf(cE -> cE.getIdCiclo()== id);
-    }
-        // buscar
+public class CicloEscolarRepository implements Repository<CicloEscolar> {
+
     @Override
-    public Optional<CicloEscolar> findById(int id){
-        for(CicloEscolar cE : cicloEscolar){ 
-            if(cE.getIdCiclo()== id){
-                return Optional.of(cE); 
-            }
-        }
-        return Optional.empty(); 
-    }
-    
-    // listar
-    @Override 
-    public List<CicloEscolar> findAll(){
-        return cicloEscolar; 
-    }
-    
-    //6. Buscar 
-    @Override 
-    public List<CicloEscolar> search(String criterio){
-        List<CicloEscolar> resultados = new ArrayList<>();
-        String filtro = criterio.toLowerCase().trim();
-        
-        //.tolowerCase convierte el texto a minuscula
-        //.contains devuelve true si el texto es similar o igual
-        for (CicloEscolar cE: cicloEscolar){
-            String anioText = String.valueOf(cE.getAnio());
-            if (anioText.contains(filtro)) {
-                resultados.add(cE);
-            }
-            
-        }
-        return resultados;
-    }
-    
-    
-      
-   }
+    public void save(CicloEscolar c) {
+        String sql = "INSERT INTO ciclos_escolares (anio, fecha_inicio, fecha_fin, activo) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, c.getAnio());
+            ps.setDate(2, Date.valueOf(c.getFechaInicio()));
+            ps.setDate(3, Date.valueOf(c.getFechaFin()));
+            ps.setBoolean(4, c.isActivo());
+            ps.executeUpdate();
 
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    c.setIdCiclo(rs.getInt(1));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error al guardar CicloEscolar: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void update(CicloEscolar c) {
+        String sql = "UPDATE ciclos_escolares SET anio = ?, fecha_inicio = ?, fecha_fin = ?, activo = ? WHERE id_ciclo = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, c.getAnio());
+            ps.setDate(2, Date.valueOf(c.getFechaInicio()));
+            ps.setDate(3, Date.valueOf(c.getFechaFin()));
+            ps.setBoolean(4, c.isActivo());
+            ps.setInt(5, c.getIdCiclo());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al actualizar CicloEscolar: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void delete(int id) {
+        String sql = "DELETE FROM ciclos_escolares WHERE id_ciclo = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Error al eliminar CicloEscolar: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public Optional<CicloEscolar> findById(int id) {
+        String sql = "SELECT id_ciclo, anio, fecha_inicio, fecha_fin, activo FROM ciclos_escolares WHERE id_ciclo = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findById CicloEscolar: " + e.getMessage());
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<CicloEscolar> findAll() {
+        List<CicloEscolar> lista = new ArrayList<>();
+        String sql = "SELECT id_ciclo, anio, fecha_inicio, fecha_fin, activo FROM ciclos_escolares ORDER BY anio DESC";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(mapear(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findAll CicloEscolar: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    @Override
+    public List<CicloEscolar> search(String criterio) {
+        if (criterio == null || criterio.trim().isEmpty()) {
+            return findAll();
+        }
+        List<CicloEscolar> lista = new ArrayList<>();
+        String sql = "SELECT id_ciclo, anio, fecha_inicio, fecha_fin, activo FROM ciclos_escolares WHERE CAST(anio AS TEXT) LIKE ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + criterio.trim() + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(mapear(rs));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en search CicloEscolar: " + e.getMessage());
+        }
+        return lista;
+    }
+
+    public Optional<CicloEscolar> findCicloActivo() {
+        String sql = "SELECT id_ciclo, anio, fecha_inicio, fecha_fin, activo FROM ciclos_escolares WHERE activo = TRUE LIMIT 1";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return Optional.of(mapear(rs));
+            }
+        } catch (SQLException e) {
+            System.err.println("Error en findCicloActivo: " + e.getMessage());
+        }
+        return findAll().stream().findFirst();
+    }
+
+    private CicloEscolar mapear(ResultSet rs) throws SQLException {
+        return new CicloEscolar(
+            rs.getInt("id_ciclo"),
+            rs.getInt("anio"),
+            rs.getDate("fecha_inicio").toLocalDate(),
+            rs.getDate("fecha_fin").toLocalDate(),
+            rs.getBoolean("activo")
+        );
+    }
+}
 

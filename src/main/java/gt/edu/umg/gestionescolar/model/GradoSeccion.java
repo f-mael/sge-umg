@@ -1,4 +1,4 @@
-package gt.edu.umg.gestionescolar.model;
+    package gt.edu.umg.gestionescolar.model;
 
 public class GradoSeccion {
     //declaracion de variables
@@ -29,4 +29,8 @@ public class GradoSeccion {
 
     public char getSeccion() { return seccion; }
     public void setSeccion(char seccion) { this.seccion = seccion; }
+    @Override
+    public String toString() {
+        return nombre + " - Sección " + seccion;
+    }
 }
