@@ -12,7 +12,7 @@
 
 /* Encabezado Superior */
 .header-bar {
-    -fx-background-color: linear-gradient(to right, #0f172a, #1e3a8a, #0369a1);
+    -fx-background-color: #0f172a;
     -fx-padding: 16px 24px;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.25), 8, 0, 0, 3);
 }

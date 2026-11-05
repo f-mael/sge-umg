@@ -17,6 +17,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class App extends Application {
     public void start(Stage stage) {
         try {
             DatabaseManager.initializeDatabase();
+            verificarConexion();
 
             // Cargar el módulo de Personas.
             FXMLLoader loaderPersonas = crearLoader("PersonasView.fxml");
@@ -119,6 +122,9 @@ public class App extends Application {
             stage.setScene(scene);
             stage.show();
 
+        } catch (SQLException e) {
+            e.printStackTrace();
+            mostrarErrorConexion(e);
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -130,6 +136,29 @@ public class App extends Application {
             );
             alerta.showAndWait();
         }
+    }
+
+    private void verificarConexion() throws SQLException {
+        try (Connection ignored = DatabaseManager.getConnection()) {
+            // Si la base no responde, la excepción se maneja en start().
+        }
+    }
+
+    private void mostrarErrorConexion(SQLException e) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR);
+        alerta.setTitle("Sin conexión a la base de datos");
+        alerta.setHeaderText("No se pudo conectar con PostgreSQL");
+
+        alerta.setContentText(
+                "Revisá estos puntos:\n\n"
+                + "1. El servicio de PostgreSQL debe estar activo en localhost:5432.\n"
+                + "2. La base de datos 'gestion_escolar' debe existir.\n"
+                + "3. La contraseña del usuario 'postgres' debe coincidir "
+                + "con la variable DB_PASSWORD.\n\n"
+                + "Detalle: " + e.getMessage()
+        );
+
+        alerta.showAndWait();
     }
 
     private FXMLLoader crearLoader(String archivo) throws IOException {
